@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050a14">
+<title>frillion</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=VT323&family=Silkscreen:wght@400;700&display=swap">
+<style>
+:root{--cy:#3fd9ff;--pk:#ff4f8b;--mut:#6f8fb0;--ye:#ffc94d;--fg:#d8ecff;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%}
+body{background:#050a14;color:var(--fg);font-family:"VT323",ui-monospace,Menlo,monospace;font-size:22px;letter-spacing:.06em;overflow-x:hidden;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.sil{position:fixed;left:-80px;opacity:.55;pointer-events:none;animation:sw 60s linear infinite}
+@keyframes sw{to{transform:translateX(120vw)}}
+@keyframes bob{50%{transform:translateY(-10px)}}
+button{font:inherit;letter-spacing:.2em;color:var(--fg);cursor:pointer}
+.btn{background:#0c1c33;border:3px solid var(--cy);padding:14px 34px;font-family:"Silkscreen",monospace;font-size:20px;box-shadow:0 0 0 3px #0b2a45,0 0 22px rgba(63,217,255,.35);text-transform:uppercase}
+.btn.s{border-color:#35557a;box-shadow:none;font-size:15px;padding:9px 16px;color:var(--mut)}
+.hidden{display:none!important}
+#sea{position:fixed;inset:0;width:100%;height:100%;z-index:0}
+@keyframes wig{50%{transform:rotate(-96deg) translateY(6px)}}
+#dsp svg{transform:rotate(-90deg);animation:wig .5s ease-in-out infinite}
+#dsp{display:flex;justify-content:center;margin:30px 0}
+@keyframes shk{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.shake{animation:shk .25s}
+@keyframes pop{from{transform:scale(.55);opacity:0}}
+#pd .tname,#pd .q,#pd .pp{animation:pop .4s ease-out}
+#stage{z-index:2;position:relative;max-width:700px;margin:0 auto;padding:110px 74px 40px 16px;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:14px}
+#hud{position:fixed;top:16px;left:0;right:70px;display:flex;justify-content:space-between;align-items:flex-start;padding:0 70px 0 64px;z-index:5;pointer-events:none}
+.pn small{display:block;font-size:14px;color:var(--mut);letter-spacing:.35em}.pn b{font-size:clamp(34px,6vw,50px);font-weight:400;text-shadow:0 0 14px currentColor}
+#sq{display:flex;gap:6px;margin-top:8px}#sq i{width:18px;height:18px;background:#15273d;border:2px solid #22405f}#sq i.on{background:var(--ye);border-color:#ffe08a;box-shadow:0 0 8px rgba(255,201,77,.6)}
+#hud .c{text-align:center}#hud .c small{display:block;margin-top:2px}
+#burger,#snd{position:fixed;z-index:9;width:44px;height:44px;background:#0b1a2e;border:2px solid #22405f;font-size:22px;padding:0;letter-spacing:0}
+#burger{left:14px;top:14px}#snd{right:84px;top:90px}
+.logo{font-family:"Silkscreen",monospace;font-weight:700;font-size:clamp(34px,9vw,64px);letter-spacing:.14em;text-shadow:4px 0 #ff3b6b,-4px 0 #3fd9ff;margin:0}
+.lg2{color:var(--mut);letter-spacing:.5em;font-size:20px}
+.tname{font-family:"Silkscreen",monospace;font-weight:700;font-size:clamp(34px,8vw,62px);letter-spacing:.2em;text-shadow:0 0 24px currentColor;margin:6px 0}
+.q{font-size:clamp(26px,5vw,34px);line-height:1.15;max-width:560px}
+.sm{color:var(--mut);font-size:19px}
+input{width:min(420px,100%);background:#06101e;border:3px solid #22405f;color:var(--fg);font:inherit;font-size:28px;letter-spacing:.1em;padding:10px 14px;text-align:center;outline:0}input:focus{border-color:var(--cy)}
+.tbar{width:min(420px,100%);height:8px;background:#15273d}.tbar i{display:block;height:100%;background:var(--cy);width:100%}
+#ruler{position:fixed;right:0;top:0;bottom:0;width:74px;overflow:hidden;z-index:4;background:linear-gradient(90deg,transparent,rgba(5,10,20,.55))}
+#rin{position:absolute;right:0;top:0;width:100%;transition:transform 1.1s cubic-bezier(.3,.7,.2,1)}
+#rin::after{content:"";position:absolute;right:0;top:0;bottom:0;width:3px;background:#22405f}
+.tk{position:absolute;right:0;width:10px;height:2px;background:#35557a}.tk.l{width:18px}.tk span{position:absolute;right:24px;top:-9px;font-size:15px;color:var(--mut);white-space:nowrap}
+#you{position:fixed;right:0;top:50%;width:74px;color:var(--pk);font-size:16px;z-index:5;display:flex;align-items:center;gap:2px;transform:translateY(-50%)}#you::after{content:"";flex:1;height:2px;background:var(--pk)}#you::before{content:"";order:2;border:7px solid transparent;border-right:12px solid var(--pk);border-left:0}
+#shrimp{position:fixed;left:11%;top:32%;animation:bob 3.2s ease-in-out infinite;filter:drop-shadow(0 0 10px #ff4f6b);pointer-events:none}
+svg{display:block;max-width:100%;overflow:visible}
+.card{width:100%;max-width:640px}
+#menu{position:fixed;inset:0;background:rgba(3,8,16,.94);z-index:20;overflow:auto;padding:70px 20px 40px}
+#menu .in{max-width:420px;margin:0 auto;display:flex;flex-direction:column;gap:10px;text-align:left}
+#menu h3{margin:16px 0 2px;color:var(--mut);font-weight:400;letter-spacing:.35em;font-size:16px}
+#menu .btn{text-align:left;font-size:15px;padding:12px 14px;display:flex;justify-content:space-between;width:100%}
+table{width:100%;border-collapse:collapse;font-size:18px;text-align:left}td{padding:6px 4px;border-bottom:1px solid #15273d;vertical-align:top}
+.t0{color:#8ea2bb}.t1{color:#c9a7ff}.t2{color:#3fd9ff}.t3{color:#5dffb0}.t4{color:#ffb347}.t5{color:#ff4f8b}
+
+body.sports-mode{background:#071b12}
+body.sports-mode #sea{background:#071b12}
+body.sports-mode .logo{text-shadow:4px 0 #ffbf3f,-4px 0 #42e6a4}
+body.sports-mode .btn{border-color:#42e6a4;box-shadow:0 0 0 3px #123c2b,0 0 22px rgba(66,230,164,.28)}
+body.sports-mode .btn.s{border-color:#3d745e;box-shadow:none}
+body.sports-mode input:focus{border-color:#42e6a4}
+body.sports-mode .tbar i{background:#42e6a4}
+</style></head><body><canvas id="sea"></canvas>
+<button id="burger" aria-label="Menu">☰</button><button id="snd" aria-label="Sound">🔊</button>
+<div id="hud" class="hidden"><div class="pn"><small>DEPTH</small><b id="hd" style="color:var(--cy)">0m</b></div><div class="c"><div id="sq"></div><small id="hl"></small></div><div class="pn" style="text-align:right"><small>SCORE</small><b id="hs" style="color:var(--pk)">0</b></div></div>
+<div id="shrimp" class="hidden"></div>
+<aside id="ruler" class="hidden"><div id="rin"></div></aside><div id="you" class="hidden">YOU</div>
+<main id="stage">
+ <section id="intro" class="card">
+  <h1 class="logo">FRILLION</h1><div class="lg2">THE DAILY DIVE</div>
+  <p class="sm" style="margin:18px 0 26px">7 prompts · 25 seconds each · rarer answers sink deeper</p>
+  <button class="btn" id="go">Dive ▼</button>
+  <p class="sm" id="stats" style="margin-top:26px"></p>
+ </section>
+ <section id="play" class="card hidden">
+  <div id="pq"><div id="psp"></div><div class="sm" id="pn"></div><div class="q" id="prompt"></div>
+   <div style="margin:16px auto 6px" class="tbar"><i id="fill"></i></div><div class="sm" id="tm"></div>
+   <div style="margin-top:12px;display:flex;gap:10px;justify-content:center"><input id="ans" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="type an answer…"><button class="btn" id="sub" style="padding:8px 18px">Sink</button></div><div class="sm" id="msg" style="min-height:28px;margin-top:8px;color:var(--pk)"></div><button class="btn s" id="pass">Pass (0 pts)</button></div>
+  <div id="pd" class="hidden"><div id="dsp"></div><div class="tname" id="dt"></div><div class="q" id="da"></div><div class="pp" style="font-size:30px;margin:8px 0"><span id="dp"></span> · <span id="dmm"></span></div><div class="sm" id="dm"></div></div>
+  <div id="pr" class="hidden"><div id="rsp"></div><div class="tname" id="rt"></div><div class="q" id="ra"></div><div style="font-size:28px;margin:10px 0"><span id="rp"></span> · <span id="rm"></span></div><div class="sm" id="rf"></div><div class="sm" id="rs" style="margin-top:14px"></div><div style="margin-top:22px"><button class="btn" id="next"></button></div></div>
+ </section>
+ <section id="end" class="card hidden">
+  <h1 class="logo" style="font-size:clamp(26px,6vw,40px)">FRILLION</h1><div class="sm" id="elab" style="letter-spacing:.3em"></div>
+  <div style="display:flex;align-items:baseline;justify-content:center;gap:14px;margin:6px 0"><b id="escore" style="font-size:clamp(70px,16vw,110px);font-weight:400;text-shadow:0 0 20px #fff4"></b><span id="edepth" style="color:var(--cy)"></span></div>
+  <div id="curve"></div><div class="sm" id="pct" style="color:var(--cy);letter-spacing:.25em;margin:2px 0 18px"></div>
+  <div class="sm" style="text-align:left;letter-spacing:.3em">DIVE LOG <span style="opacity:.6">DEEPER = RARER</span></div><div id="dlog"></div>
+  <details style="text-align:left;margin:14px 0"><summary class="sm" style="cursor:pointer">ANSWERS &amp; DEEPEST POSSIBLE</summary><table id="recap"></table></details>
+  <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn s" id="share">Copy result</button><button class="btn s" id="again">Dive again</button><button class="btn s" id="home">Menu</button></div>
+ </section>
+</main>
+<div id="menu" class="hidden"><button class="btn s" id="mx" style="position:fixed;right:16px;top:14px">✕</button><div class="in">
+ <h3>DIVE IN</h3><button class="btn" id="m-d"><span>Daily dive</span><span id="m-ds"></span></button><button class="btn" id="m-u"><span>∞ Unlimited</span><span class="sm">new every dive</span></button>
+ <h3>EBK REQUIRED</h3><button class="btn" id="m-sports"><span>EBK Required—Sports</span><span class="sm">10 prompts · all sports</span></button>
+ <h3>THEMED PACKS</h3><div id="m-p" style="display:flex;flex-direction:column;gap:10px"></div>
+ <h3>ARCHIVE</h3><div id="m-a" style="display:flex;flex-direction:column;gap:10px"></div>
+ <h3>SETTINGS</h3><button class="btn" id="m-snd"><span>Sound</span><span id="m-sv"></span></button><button class="btn" id="m-rs"><span>Reset all progress</span><span>⚠</span></button>
+ <h3>FAQ</h3><p class="sm" style="margin:0">Each dive has seven prompts, one from each broad category, each with its own specific question. Wrong answers can be retried until the timer runs out. Rarity is a curated ranking, not live votes. Too Clever (15) is the obscure pick everyone makes. Daily dives are the same for everyone each day and count once. Scores save in this browser only.</p>
+</div></div>
+<script>
+const D={
+"a country":"usa,china,india,brazil,canada,france,germany,japan,italy,spain,mexico,australia,russia,egypt,argentina,sweden,norway,kenya,peru,turkey,thailand,vietnam,poland,ireland,portugal,chile,morocco,nepal,iceland,cuba,jordan,ghana,estonia,bhutan,laos,malta,tuvalu,eritrea,comoros,suriname,kiribati,nauru,djibouti,lesotho,brunei,vanuatu,palau",
+"a fruit":"apple,banana,orange,grape,strawberry,pear,peach,cherry,mango,pineapple,watermelon,lemon,plum,kiwi,blueberry,raspberry,apricot,pomegranate,papaya,fig,lychee,guava,cranberry,nectarine,persimmon,tangerine,dragonfruit,starfruit,quince,mulberry,jackfruit,durian,rambutan,soursop,loquat,kumquat,salak,jabuticaba,cherimoya,mangosteen",
+"a chemical element":"oxygen,hydrogen,carbon,gold,silver,iron,helium,nitrogen,copper,sodium,calcium,zinc,lead,mercury,neon,tin,chlorine,sulfur,uranium,platinum,nickel,lithium,potassium,aluminum,argon,titanium,cobalt,iodine,krypton,xenon,radon,bismuth,tungsten,cesium,osmium,iridium,hafnium,thulium,ytterbium,rhenium,gadolinium,berkelium,seaborgium",
+"a US state":"california,texas,florida,new york,ohio,georgia,alaska,hawaii,nevada,arizona,colorado,oregon,michigan,illinois,virginia,utah,maine,montana,kansas,iowa,nebraska,tennessee,kentucky,alabama,idaho,wyoming,vermont,delaware,rhode island,north dakota,west virginia,new hampshire,arkansas,oklahoma,mississippi",
+"a programming language":"python,javascript,java,c,html,sql,php,ruby,swift,go,rust,kotlin,typescript,perl,r,matlab,scala,haskell,lua,dart,julia,elixir,fortran,cobol,lisp,erlang,clojure,ocaml,prolog,smalltalk,racket,forth,nim,crystal,zig,brainfuck,apl,haxe",
+"a world capital":"paris,london,tokyo,rome,berlin,madrid,cairo,moscow,beijing,washington,ottawa,canberra,lima,nairobi,athens,oslo,vienna,dublin,lisbon,bangkok,hanoi,havana,santiago,warsaw,helsinki,prague,budapest,kathmandu,quito,tallinn,reykjavik,amman,accra,vientiane,valletta,thimphu,asmara,moroni,paramaribo,honiara,bishkek,ashgabat,ulaanbaatar,funafuti,yaren,nukualofa",
+"a dog breed":"labrador,golden retriever,poodle,bulldog,beagle,german shepherd,chihuahua,husky,boxer,dachshund,pug,corgi,rottweiler,doberman,great dane,shih tzu,collie,dalmatian,greyhound,samoyed,akita,whippet,basenji,vizsla,saluki,weimaraner,pointer,newfoundland,bloodhound,keeshond,pharaoh hound,borzoi,komondor,puli,azawakh,xoloitzcuintli,otterhound,sloughi,lagotto romagnolo",
+"a musical instrument":"piano,guitar,drums,violin,flute,trumpet,saxophone,cello,clarinet,bass,harp,trombone,ukulele,banjo,accordion,harmonica,oboe,xylophone,tuba,bagpipes,mandolin,sitar,bassoon,tambourine,didgeridoo,theremin,harpsichord,lute,zither,ocarina,kalimba,hurdy gurdy,glockenspiel,sousaphone,shakuhachi,erhu,oud,hang drum,serpent,nyckelharpa",
+"a sport":"soccer,basketball,baseball,football,tennis,golf,hockey,swimming,volleyball,boxing,rugby,cricket,skiing,surfing,wrestling,archery,badminton,gymnastics,rowing,fencing,curling,lacrosse,handball,squash,polo,biathlon,bobsled,skeleton,pickleball,sepak takraw,jai alai,hurling,korfball,kabaddi,bandy,shinty,netball,luge",
+"a color":"red,blue,green,yellow,orange,purple,pink,black,white,brown,gray,gold,silver,teal,navy,turquoise,maroon,beige,lavender,magenta,cyan,indigo,violet,crimson,coral,olive,salmon,mauve,ochre,fuchsia,chartreuse,vermilion,cerulean,periwinkle,puce,taupe,amaranth,viridian,umber,sienna",
+"a river":"nile,amazon,mississippi,thames,seine,danube,rhine,yangtze,ganges,missouri,colorado,hudson,volga,congo,mekong,tigris,euphrates,rio grande,columbia,ohio,po,tiber,loire,elbe,orinoco,niger,zambezi,irrawaddy,limpopo,murray,yenisei,lena,oder,dnieper,shannon,tagus,brahmaputra,mackenzie,yukon,okavango",
+"a cheese":"cheddar,mozzarella,parmesan,swiss,brie,gouda,feta,provolone,blue cheese,cream cheese,havarti,gruyere,camembert,ricotta,colby,monterey jack,gorgonzola,manchego,roquefort,halloumi,edam,pecorino,asiago,mascarpone,stilton,paneer,taleggio,raclette,comte,burrata,emmental,limburger,jarlsberg,cotija,munster,reblochon,epoisses,wensleydale,caerphilly,casu marzu",
+"a vegetable":"carrot,potato,tomato,onion,broccoli,lettuce,spinach,corn,cucumber,celery,pepper,cabbage,pea,cauliflower,garlic,mushroom,zucchini,asparagus,beet,radish,eggplant,kale,turnip,squash,leek,artichoke,okra,parsnip,fennel,rutabaga,kohlrabi,celeriac,endive,bok choy,chard,daikon,salsify,cardoon,jicama,romanesco",
+"a bird":"eagle,owl,robin,parrot,penguin,crow,duck,chicken,sparrow,hawk,pigeon,flamingo,swan,peacock,ostrich,hummingbird,woodpecker,pelican,falcon,turkey,goose,cardinal,seagull,toucan,heron,kiwi,albatross,puffin,kingfisher,cormorant,hornbill,kookaburra,cassowary,bittern,lyrebird,hoatzin,shoebill,kakapo,secretary bird,oilbird",
+"a gemstone":"diamond,ruby,emerald,sapphire,amethyst,opal,pearl,topaz,garnet,turquoise,jade,onyx,quartz,aquamarine,peridot,citrine,obsidian,moonstone,tourmaline,agate,jasper,lapis lazuli,tanzanite,alexandrite,spinel,zircon,malachite,carnelian,iolite,bloodstone,sunstone,labradorite,kunzite,morganite,benitoite,painite",
+"a car brand":"toyota,ford,honda,chevrolet,bmw,mercedes,tesla,audi,nissan,volkswagen,hyundai,kia,jeep,subaru,mazda,porsche,ferrari,lexus,volvo,dodge,lamborghini,jaguar,fiat,mini,buick,cadillac,bentley,maserati,peugeot,renault,suzuki,mitsubishi,bugatti,saab,lotus,pagani,koenigsegg,alfa romeo,delorean,tatra",
+"a composer":"mozart,beethoven,bach,chopin,tchaikovsky,vivaldi,brahms,handel,haydn,schubert,liszt,debussy,wagner,verdi,mahler,stravinsky,rachmaninoff,dvorak,grieg,ravel,mendelssohn,schumann,prokofiev,sibelius,bartok,holst,satie,copland,gershwin,ives,messiaen,ligeti,xenakis,penderecki,part,tallis,palestrina,monteverdi,telemann",
+"a sea creature":"shark,dolphin,whale,octopus,jellyfish,crab,lobster,starfish,seahorse,turtle,squid,seal,stingray,clam,eel,sea lion,walrus,manatee,orca,narwhal,anemone,urchin,barracuda,swordfish,manta ray,cuttlefish,nautilus,krill,lionfish,anglerfish,sea cucumber,isopod,remora,sunfish,oarfish,pufferfish,hagfish,barreleye,vampire squid,coelacanth,siphonophore",
+"a currency":"dollar,euro,pound,yen,peso,rupee,franc,yuan,won,ruble,krona,lira,real,rand,dinar,dirham,shekel,baht,zloty,forint,krone,rial,dong,naira,riyal,kwacha,lek,lev,leu,tugrik,kip,pataca,loti,ngultrum,manat,boliviano,quetzal,balboa,dalasi,vatu",
+"a pasta shape":"spaghetti,penne,macaroni,lasagna,fettuccine,ravioli,linguine,rigatoni,tortellini,fusilli,farfalle,orzo,angel hair,gnocchi,cannelloni,rotini,ziti,orecchiette,pappardelle,bucatini,tagliatelle,conchiglie,cavatappi,ditalini,radiatori,gemelli,campanelle,strozzapreti,trofie,casarecce,mafalde,fregola,paccheri,capellini,tripoline,lumache,anelli,croxetti,culurgiones,busiate",
+"a tree":"oak,pine,maple,birch,elm,willow,cedar,palm,redwood,spruce,fir,cherry,apple,ash,beech,cypress,poplar,walnut,sequoia,magnolia,hickory,aspen,juniper,eucalyptus,baobab,mahogany,teak,sycamore,hemlock,larch,hawthorn,linden,alder,hornbeam,yew,rowan,tamarack,ginkgo,banyan,kauri,monkey puzzle"
+};
+const CL={"a country":"tuvalu,bhutan","a fruit":"dragonfruit,starfruit","a chemical element":"tungsten,osmium","a US state":"rhode island","a programming language":"brainfuck,cobol","a world capital":"reykjavik","a dog breed":"basenji,xoloitzcuintli","a musical instrument":"theremin,didgeridoo","a sport":"curling,sepak takraw","a color":"chartreuse,puce","a river":"okavango","a cheese":"casu marzu,halloumi","a vegetable":"romanesco,kohlrabi","a bird":"kakapo,shoebill","a gemstone":"alexandrite,painite","a car brand":"delorean,tatra","a composer":"ligeti,xenakis","a sea creature":"anglerfish,vampire squid","a currency":"vatu,tugrik","a pasta shape":"strozzapreti,orecchiette","a tree":"monkey puzzle,baobab"};
+const GB={"a country":"Geography","a world capital":"Geography","a river":"Geography","a US state":"Geography","a fruit":"Food & Drink","a cheese":"Food & Drink","a vegetable":"Food & Drink","a pasta shape":"Food & Drink","a chemical element":"Nature & Science","a bird":"Nature & Science","a gemstone":"Nature & Science","a tree":"Nature & Science","a sea creature":"Nature & Science","a dog breed":"Nature & Science","a composer":"Arts & Entertainment","a musical instrument":"Arts & Entertainment","a color":"Arts & Entertainment","a sport":"Sports & Games","a programming language":"Tech","a car brand":"Tech","a currency":"History & Culture"};
+const BR=["Geography","Food & Drink","Nature & Science","Arts & Entertainment","Sports & Games","History & Culture","Tech"];
+// Specific prompts. Items run most common -> rarest. "/" = aliases, "*" = Too Clever pick.
+const SPDATA=`Geography|Name an African country|nigeria,egypt,south africa,kenya,ethiopia,morocco,ghana,tanzania,algeria,senegal,uganda,zambia,*namibia,mali,rwanda,botswana,eswatini/swaziland,lesotho,djibouti,comoros,sao tome and principe
+Geography|Name an Asian country|china,india,japan,thailand,vietnam,south korea,indonesia,pakistan,philippines,nepal,malaysia,mongolia,*bhutan,laos,cambodia,kyrgyzstan,brunei,tajikistan,maldives,timor-leste/east timor
+Geography|Name a landlocked country|switzerland,austria,hungary,czechia/czech republic,nepal,bolivia,mongolia,ethiopia,afghanistan,uganda,*luxembourg,paraguay,belarus,slovakia,rwanda,laos,zambia,liechtenstein,lesotho,san marino
+Geography|Name an island country|japan,iceland,cuba,madagascar,philippines,ireland,new zealand,sri lanka,jamaica,cyprus,haiti,fiji,*malta,bahrain,mauritius,seychelles,tonga,samoa,palau,tuvalu
+Geography|Name the capital of a US state|boston,austin,denver,atlanta,phoenix,nashville,sacramento,honolulu,columbus,indianapolis,salt lake city,oklahoma city,springfield,richmond,santa fe,albany,providence,salem,madison,hartford,juneau,olympia,boise,trenton,*annapolis,augusta,harrisburg,topeka,lincoln,helena,pierre,concord,dover,montpelier,cheyenne,bismarck,frankfort
+Geography|Name a river in Europe|danube,thames,rhine,seine,volga,po,elbe,tiber,loire,rhone,vistula,oder,tagus,ebro,shannon,dnieper,*douro,garonne,meuse,vltava,daugava,glomma
+Geography|Name a mountain range|alps,rockies,himalayas,andes,appalachians,urals,pyrenees,atlas,carpathians,sierra nevada,cascades,caucasus,dolomites,tatras,*karakoram,hindu kush,altai,apennines,pamirs,drakensberg
+Geography|Name a desert|sahara,gobi,mojave,kalahari,atacama,arabian,sonoran,thar,namib,negev,patagonian,*taklamakan,great victoria,simpson,karakum,danakil,chihuahuan
+Geography|Name a famous world landmark|eiffel tower,statue of liberty,great wall of china,colosseum,taj mahal,big ben,pyramids,machu picchu,sydney opera house,stonehenge,christ the redeemer,petra,angkor wat,alhambra,*neuschwanstein,sagrada familia,chichen itza,hagia sophia,borobudur,meteora
+Geography|Name a large lake|superior,michigan,victoria,tahoe,geneva,baikal,erie,ontario,huron,titicaca,como,garda,*winnipeg,ladoga,tanganyika,malawi,vostok,nicaragua,balaton,lucerne
+Food & Drink|Name a French cheese|brie,camembert,roquefort,comte,munster,reblochon,epoisses,morbier,cantal,saint-nectaire,chaource,*mimolette,bleu d'auvergne,ossau-iraty,pont-l'eveque,livarot,neufchatel
+Food & Drink|Name an Italian dish|pizza,lasagna,carbonara,risotto,tiramisu,gnocchi,ravioli,bruschetta,osso buco,minestrone,caprese,saltimbocca,panna cotta,arancini,*cacio e pepe,pasta e fagioli,ribollita,bagna cauda,porchetta,vitello tonnato,pizzoccheri
+Food & Drink|Name a Mexican dish|tacos,burrito,quesadilla,enchilada,guacamole,nachos,tamales,fajitas,pozole,chilaquiles,mole,elote,tostada,*cochinita pibil,birria,sopes,huaraches,chiles en nogada,tlayuda,menudo
+Food & Drink|Name a spice or herb|pepper,cinnamon,paprika,cumin,oregano,basil,thyme,rosemary,turmeric,ginger,nutmeg,cloves,coriander,cardamom,saffron,sage,dill,star anise,*sumac,asafoetida,fenugreek,mace,grains of paradise,long pepper,nigella
+Food & Drink|Name a type of bread|baguette,sourdough,ciabatta,naan,pita,focaccia,rye,brioche,bagel,tortilla,pretzel,challah,*pumpernickel,injera,roti,lavash,matzo,soda bread,bao,arepa,pao de queijo,bannock
+Food & Drink|Name a cocktail|margarita,mojito,martini,old fashioned,cosmopolitan,daiquiri,manhattan,negroni,mimosa,pina colada,bloody mary,moscow mule,mai tai,whiskey sour,*sazerac,gimlet,paloma,aviation,boulevardier,last word,corpse reviver,vieux carre
+Food & Drink|Name a nut or seed|peanut,almond,walnut,cashew,pecan,pistachio,hazelnut,sunflower seed,pumpkin seed,sesame seed,macadamia,chestnut,pine nut,brazil nut,flaxseed,chia seed,*hemp seed,pili nut,kola nut,ginkgo nut,candlenut,poppy seed
+Food & Drink|Name a coffee or tea drink|espresso,latte,cappuccino,americano,macchiato,mocha,flat white,cortado,earl grey,green tea,chai,matcha,oolong,*lungo,ristretto,affogato,darjeeling,lapsang souchong,rooibos,yerba mate,gyokuro,pu-erh
+Food & Drink|Name a sauce or condiment|ketchup,mustard,mayonnaise,soy sauce,hot sauce,bbq sauce,ranch,salsa,pesto,sriracha,tahini,*worcestershire,chimichurri,harissa,tzatziki,hollandaise,sambal,gochujang,romesco
+Nature & Science|Name an animal in Africa|lion,elephant,giraffe,zebra,hippo,cheetah,rhino,gorilla,leopard,hyena,crocodile,wildebeest,meerkat,warthog,baboon,okapi,aardvark,pangolin,*bongo,aye-aye,fossa,mandrill,serval,honey badger
+Nature & Science|Name an animal that lives in polar regions|polar bear,penguin,seal,walrus,arctic fox,narwhal,orca,reindeer/caribou,snowy owl,musk ox,beluga,arctic hare,leopard seal,emperor penguin,*krill,ptarmigan,wolverine,lemming
+Nature & Science|Name a whale or dolphin|blue whale,humpback,orca,sperm whale,beluga,narwhal,bottlenose dolphin,gray whale,minke,right whale,pilot whale,fin whale,*bowhead,sei whale,river dolphin,porpoise,cuvier's beaked whale,hector's dolphin,vaquita
+Nature & Science|Name an insect|ant,bee,butterfly,mosquito,fly,ladybug,beetle,grasshopper,dragonfly,wasp,cricket,moth,cockroach,termite,firefly,mantis,flea,*cicada,earwig,katydid,lacewing,stick insect,antlion,weevil,thrips,dobsonfly
+Nature & Science|Name a type of weather or cloud|rain,snow,hail,thunderstorm,tornado,hurricane,fog,cumulus,blizzard,sleet,drizzle,cirrus,stratus,cumulonimbus,monsoon,*nimbostratus,altocumulus,virga,haboob,derecho,mammatus,graupel
+Nature & Science|Name a bone in the human body|skull,femur,rib,spine,pelvis,humerus,tibia,fibula,radius,ulna,clavicle,scapula,sternum,patella,mandible,*coccyx,sacrum,carpal,tarsal,stapes,hyoid,talus,sphenoid,ethmoid,calcaneus,scaphoid
+Nature & Science|Name a planet or moon|earth,mars,jupiter,saturn,venus,mercury,neptune,uranus,moon,europa,titan,io,ganymede,*triton,callisto,enceladus,phobos,deimos,charon,miranda,titania,oberon,mimas,iapetus
+Nature & Science|Name a famous scientist|einstein,newton,darwin,curie,galileo,tesla,hawking,pasteur,edison,faraday,bohr,feynman,maxwell,mendel,*lavoisier,rutherford,heisenberg,noether,hubble,boltzmann,dirac,fermi,chandrasekhar,meitner
+Nature & Science|Name a rock or mineral|granite,marble,limestone,quartz,sandstone,basalt,obsidian,slate,gypsum,pumice,talc,mica,feldspar,*gneiss,schist,dolomite,pyrite,fluorite,calcite,bauxite,serpentine,chert,apatite
+Nature & Science|Name a dinosaur|tyrannosaurus/t-rex,triceratops,velociraptor,stegosaurus,brachiosaurus,diplodocus,ankylosaurus,spinosaurus,allosaurus,iguanodon,parasaurolophus,*pachycephalosaurus,carnotaurus,therizinosaurus,dilophosaurus,gallimimus,compsognathus,microraptor,utahraptor,argentinosaurus
+Arts & Entertainment|Name a Disney animated movie|the lion king/lion king,frozen,aladdin,moana,beauty and the beast,the little mermaid/little mermaid,cinderella,snow white,tangled,mulan,encanto,bambi,dumbo,pinocchio,hercules,pocahontas,the aristocats/aristocats,*robin hood,lilo and stitch,the emperor's new groove,treasure planet,oliver and company,the black cauldron
+Arts & Entertainment|Name a Beatles song|hey jude,let it be,yesterday,help,come together,something,here comes the sun,twist and shout,michelle,blackbird,penny lane,eleanor rigby,day tripper,taxman,*revolution,girl,rain,i am the walrus,dear prudence,for no one,tomorrow never knows,glass onion
+Arts & Entertainment|Name a Shakespeare play|hamlet,romeo and juliet,macbeth,othello,king lear,the tempest/tempest,a midsummer night's dream/midsummer night's dream,julius caesar,twelfth night,much ado about nothing,the merchant of venice/merchant of venice,as you like it,richard iii,*coriolanus,cymbeline,timon of athens,pericles,titus andronicus,measure for measure,love's labour's lost,troilus and cressida,the winter's tale/winter's tale
+Arts & Entertainment|Name a famous painter|da vinci/leonardo,picasso,van gogh,monet,rembrandt,michelangelo,dali,warhol,matisse,munch,klimt,vermeer,pollock,caravaggio,*hokusai,kahlo,goya,turner,magritte,basquiat,bruegel,rothko,hopper,seurat,mucha
+Arts & Entertainment|Name a Pixar movie|toy story,finding nemo,the incredibles/incredibles,up,inside out,monsters inc/monsters inc.,cars,coco,ratatouille,wall-e,brave,soul,luca,onward,turning red,a bug's life/bugs life,the good dinosaur/good dinosaur,*elemental,lightyear,finding dory,cars 3,monsters university
+Arts & Entertainment|Name a video game character|mario,sonic,link,pikachu,pac-man,kirby,donkey kong,samus,lara croft,master chief,zelda,luigi,yoshi,crash bandicoot,*mega man,solid snake,ryu,cloud strife/cloud,geralt,q*bert,dig dug,earthworm jim,rayman,banjo,captain falcon
+Arts & Entertainment|Name a type of dance|ballet,salsa,tango,waltz,hip hop,tap,jazz,breakdance/breaking,swing,flamenco,foxtrot,cha-cha,polka,bachata,samba,*lindy hop,charleston,morris dance,bharatanatyam,kathak,hula,haka,quadrille,jive
+Sports & Games|Name a summer Olympic sport|swimming,gymnastics,athletics/track and field,basketball,soccer/football,tennis,boxing,cycling,rowing,volleyball,diving,archery,fencing,judo,weightlifting,wrestling,golf,*modern pentathlon,triathlon,equestrian,sailing,handball,water polo,canoeing,taekwondo,badminton,table tennis,trampoline,skateboarding,rugby sevens,sport climbing,breaking
+Sports & Games|Name a winter sport|skiing,snowboarding,ice hockey,figure skating,curling,bobsled/bobsleigh,luge,speed skating,biathlon,cross-country skiing,ski jumping,*skeleton,nordic combined,freestyle skiing,snowshoeing,ice climbing,bandy,ski mountaineering,mogul skiing,short track
+Sports & Games|Name an NBA team|lakers,celtics,bulls,warriors,knicks,heat,spurs,nets,mavericks,suns,bucks,nuggets,clippers,76ers/sixers,raptors,rockets,*grizzlies,pelicans,timberwolves,jazz,hornets,pistons,magic,pacers,kings,thunder,trail blazers,wizards,cavaliers,hawks
+Sports & Games|Name a famous soccer player|messi,ronaldo,pele,maradona,neymar,mbappe,beckham,zidane,cruyff,haaland,salah,modric,ronaldinho,henry,puskas,*eusebio,gullit,baggio,socrates,yashin,garrincha,kaka
+Sports & Games|Name a professional tennis player|federer,nadal,djokovic,serena williams,venus williams,sampras,agassi,murray,alcaraz,sinner,borg,mcenroe,graf,navratilova,*evert,laver,becker,ashe,gauff,henin,seles,hingis,kuerten,safin
+Sports & Games|Name a martial art|karate,judo,taekwondo,kung fu,boxing,jiu-jitsu,muay thai,aikido,kickboxing,krav maga,capoeira,wrestling,sambo,*kendo,hapkido,wing chun,sumo,savate,silat,kalaripayattu,eskrima,systema,bartitsu,jeet kune do,tai chi
+Sports & Games|Name a position in American football|quarterback,running back,wide receiver,tight end,linebacker,cornerback,safety,kicker,punter,center,guard,tackle,defensive end,fullback,*nose tackle,long snapper,slot receiver,nickelback
+History & Culture|Name a US president|lincoln/abraham lincoln,washington,obama,kennedy,roosevelt,trump,biden,reagan,clinton,jefferson,nixon,bush,eisenhower,carter,truman,wilson,harding,*polk,taft,pierce,garfield,van buren,coolidge,tyler,fillmore,hayes,cleveland,monroe
+History & Culture|Name an ancient civilization|roman/rome/romans,greek/greece/greeks,egyptian/egypt,mayan/maya,aztec,inca,persian/persia,babylonian,sumerian,han chinese,phoenician,mesopotamian,*minoan,hittite,etruscan,assyrian,nubian/kush,olmec,khmer,carthaginian,mycenaean,indus valley
+History & Culture|Name a world religion or belief system|christianity,islam,hinduism,buddhism,judaism,sikhism,taoism,shinto,atheism,*jainism,zoroastrianism,baha'i,confucianism,rastafari,druze,animism,yazidism,cao dai,tenrikyo
+History & Culture|Name a language|english,spanish,mandarin/chinese,french,german,arabic,hindi,portuguese,russian,japanese,italian,korean,turkish,swahili,greek,dutch,swedish,*finnish,hungarian,basque,quechua,navajo,maori,icelandic,tagalog,yoruba,esperanto,welsh,amharic,georgian,zulu
+History & Culture|Name an invention|wheel,telephone,light bulb,printing press,airplane,computer,internet,car/automobile,radio,television,compass,steam engine,telescope,*zipper,safety pin,microwave oven,barcode,velcro,dynamite,pacemaker,stethoscope,sextant,phonograph
+History & Culture|Name a famous explorer|columbus,magellan,marco polo,cook/james cook,vasco da gama,amundsen,hillary,shackleton,livingstone,drake,cortes,ponce de leon,*ibn battuta,zheng he,erik the red,cabot,champlain,hudson,tasman,nansen
+History & Culture|Name a Roman emperor|augustus,nero,caligula,trajan,hadrian,marcus aurelius,constantine,tiberius,claudius,vespasian,titus,domitian,commodus,*diocletian,septimius severus,elagabalus,otho,galba,vitellius,pertinax
+Tech|Name a social media site or app|facebook,youtube,instagram,twitter/x,tiktok,reddit,snapchat,linkedin,pinterest,twitch,tumblr,discord,wikipedia,myspace,*vine,flickr,digg,bluesky,mastodon,imgur,goodreads,stack overflow,neopets,habbo
+Tech|Name a video game console|playstation,xbox,nintendo switch/switch,wii,nes,super nintendo/snes,sega genesis/genesis,game boy,nintendo 64/n64,gamecube,atari 2600,dreamcast,psp,ps vita,*neo geo,turbografx-16,3do,virtual boy,intellivision,colecovision,sega saturn,wonderswan
+Tech|Name a web browser|chrome,safari,firefox,edge,opera,internet explorer,brave,vivaldi,netscape,*lynx,tor browser,arc,konqueror,midori,mosaic,worldwideweb,seamonkey,maxthon,dillo
+Tech|Name a tech company|apple,google,microsoft,amazon,meta/facebook,tesla,netflix,intel,ibm,samsung,sony,nvidia,oracle,adobe,atari,cisco,*palantir,cloudflare,arm,asml,xerox,commodore,sun microsystems,dell
+Tech|Name a key on a computer keyboard|enter,space,shift,escape/esc,tab,control/ctrl,alt,delete,backspace,caps lock,*home,end,page up,insert,print screen,scroll lock,pause/break,num lock
+Tech|Name a famous tech founder or pioneer|jobs,gates,zuckerberg,musk,bezos,page,brin,wozniak,*ellison,dorsey,huang,torvalds,ritchie,berners-lee,turing,lovelace,hopper,knuth,cerf,thompson`;
+const norm=s=>s.toLowerCase().replace(/^(the|a|an)\s+/,"").replace(/[^a-z0-9]/g,"").replace(/s$/,"");
+const parse=(a,cl)=>a.split(",").map(s=>{let c=s[0]=="*";if(c)s=s.slice(1);const n=s.split("/");return{w:n[0],n:n.map(norm),cl:c||(cl||"").split(",").includes(n[0])}});
+const SPS=SPDATA.split("\n").map(s=>{const[b,q,a]=s.split("|");return{b,q,id:q,items:parse(a)}});
+const GEN=Object.entries(D).map(([k,v])=>({b:GB[k],k,id:k,gen:1,items:parse(v,CL[k])}));
+const ALL=[...SPS,...GEN];
+const T=[["Plankton",10,"t0","⬜","Everyone's first thought. Barely a ripple."],["Too Clever",15,"t1","🟪","Too clever - everyone zigs the same way."],["Schooler",30,"t2","🟦","Solid - swims with the school."],["Rare",60,"t3","🟩","Rare find - few swim this deep."],["Deep Cut",85,"t4","🟧","Deep cut - it's dark down here."],["One in a Trench",100,"t5","🟥","Trench floor. Nobody comes down here."]];
+const COL={t0:"#8ea2bb",t1:"#c9a7ff",t2:"#3fd9ff",t3:"#5dffb0",t4:"#ffb347",t5:"#ff4f8b"};
+const ST=[["Rookie",10,"t0","⚪","The basics. You know the scoreboard."],["Starter",15,"t1","🟣","A smart pick, but still in warm-ups."],["All-Star",30,"t2","🔵","Strong knowledge. You made the lineup."],["Pro",60,"t3","🟢","Deep sports knowledge. Big-league stuff."],["Hall of Fame",85,"t4","🟠","A rare pull from the sports archive."],["Legend",100,"t5","🔴","Niche sports brilliance. Raise the banner."]];
+const SPORTDATA=`Basketball|Name an NBA team|lakers,celtics,bulls,warriors,knicks,heat,spurs,nets,mavericks,suns,bucks,nuggets,clippers,76ers/sixers,raptors,rockets,*grizzlies,pelicans,timberwolves,jazz,hornets,pistons,magic,pacers,kings,thunder,trail blazers,wizards,cavaliers,hawks
+Basketball|Name a basketball position|point guard,shooting guard,small forward,power forward,center,guard,forward,*stretch four,wing,combo guard
+Basketball|Name a basketball statistic|points,rebounds,assists,steals,blocks,turnovers,field goal percentage,free throw percentage,three-point percentage,*plus-minus,usage rate,true shooting percentage
+Football|Name an NFL team|cowboys,patriots,packers,steelers,49ers,giants,eagles,chiefs,bills,dolphins,ravens,broncos,bears,lions,vikings,texans,jets,commanders,raiders,chargers,cardinals,falcons,panthers,bengals,browns,colts,jaguars,titans,buccaneers,rams,seahawks,*saints
+Football|Name a football position|quarterback,running back,wide receiver,tight end,linebacker,cornerback,safety,kicker,punter,center,guard,tackle,defensive end,fullback,*nose tackle,long snapper,slot receiver,nickelback
+Baseball|Name a baseball pitch|fastball,curveball,slider,changeup,knuckleball,sinker,cutter,splitter,screwball,*eephus,slurve,gyro slider
+Baseball|Name an MLB team|yankees,red sox,cubs,dodgers,cardinals,giants,astros,braves,phillies,mets,angels,mariners,twins,brewers,guardians,orioles,blue jays,royals,white sox,tigers,rangers,rockies,diamondbacks,marlins,nationals,pirates,rays,reds,athletics,*padres
+Soccer|Name a soccer club|real madrid,barcelona,manchester united,liverpool,arsenal,chelsea,bayern munich,juventus,ac milan,inter milan,psg,borussia dortmund,ajax,benfica,porto,tottenham,manchester city,atletico madrid,*feyenoord,napoli,sevilla
+Soccer|Name a soccer position|goalkeeper,defender,midfielder,forward,striker,winger,fullback,center back,*false nine, sweeper,wingback
+Tennis|Name a Grand Slam tennis tournament|wimbledon,us open,french open,australian open
+Tennis|Name a tennis shot|serve,forehand,backhand,volley,lob,smash,drop shot,slice,half volley,*tweener,passing shot
+Golf|Name a major golf tournament|masters,us open,open championship,british open,pga championship
+Golf|Name a golf club|driver,putter,wedge,iron,wood,hybrid,sand wedge,pitching wedge,*lob wedge,chipper
+Hockey|Name an NHL team|canadiens,maple leafs,bruins,red wings,rangers,blackhawks,penguins,flyers,devils,sharks,capitals,lightning,avalanches,stars,oilers,flames,canucks,wild,senators,panthers,hurricanes,blues,ducks,kings,kraken,jets,islanders,*predators,blue jackets
+Olympics|Name a summer Olympic sport|athletics,swimming,gymnastics,basketball,soccer,tennis,boxing,cycling,rowing,volleyball,diving,archery,fencing,judo,weightlifting,wrestling,golf,*modern pentathlon,triathlon,equestrian,sailing,handball,water polo,canoeing,taekwondo,badminton,table tennis,trampoline,skateboarding,sport climbing,breaking
+Racing|Name a motorsport series or race|formula one,nascar,indycar,motogp,formula e,daytona 500,indianapolis 500,monaco grand prix,le mans,rally,*supercross,bathurst 1000
+Cricket|Name a cricket term|wicket,over,run, boundary,innings,googly, yorker,lbw,bouncer,crease,stump,*carrom ball, doosra
+Olympics|Name a sport|soccer,basketball,baseball,football,tennis,golf,hockey,boxing,cricket,rugby,volleyball,swimming,athletics,cycling,gymnastics,wrestling,skiing,surfing,archery,fencing,judo,rowing,canoeing,sailing,diving,badminton,table tennis,squash,handball,water polo,climbing,weightlifting,triathlon,biathlon,bobsleigh,luge,curling,formula one,nascar,motogp,horse racing,esports,shooting,darts,billiards,skateboarding,snowboarding,*sepak takraw,underwater hockey,orienteering
+Olympics|Name a winter sport|skiing,snowboarding,ice hockey,figure skating,curling,bobsleigh,luge,speed skating,biathlon,cross-country skiing,ski jumping,skeleton,freestyle skiing,nordic combined,ice climbing,bandy,snowshoeing,*ski mountaineering,telemark skiing
+Olympics|Name a water sport|swimming,diving,water polo,surfing,rowing,canoeing,kayaking,sailing,open water swimming,wind surfing,water skiing,wakeboarding,rafting,dragon boat racing,jet skiing,synchronized swimming,*underwater hockey,cliff diving,bodyboarding
+Olympics|Name a combat sport|boxing,wrestling,judo,karate,taekwondo,fencing,kickboxing,muay thai,mixed martial arts,jiu-jitsu,sambo,aikido,capoeira,savate,sumo,kendo,eskrima,*pankration,combat sambo
+Olympics|Name a track and field event|100 meters,200 meters,400 meters,800 meters,1500 meters,marathon,hurdles,steeplechase,relay,long jump,high jump,triple jump,pole vault,shot put,discus,hammer throw,javelin,decathlon,heptathlon,*race walking,cross country
+Tennis|Name a sport played with a racket|tennis,badminton,table tennis,squash,racquetball,pickleball,padel,real tennis,platform tennis,*speed badminton,soft tennis
+Basketball|Name a team sport|basketball,soccer,football,baseball,hockey,volleyball,rugby,cricket,handball,lacrosse,water polo,field hockey,ice hockey,ultimate frisbee,netball,softball,rowing,relay racing,*kabaddi,shinty,hurling
+Baseball|Name a piece of sports equipment|ball,bat,glove,helmet,net,racket,stick,goal,hoop,puck,skis,skates,cleats,shoulder pads,shin guards,boxing gloves,stopwatch,whistle,jersey,helmet,weight,disc,javelin,bow,arrow,paddle,club,golf ball,tee,cricket bat,*starting blocks,grip tape,slalom gates
+Soccer|Name a sports venue|stadium,arena,gym,pitch,field,court,track,course,green,ring,velodrome,dojo, pool,ice rink,ballpark,ballpark,diamond,autodrome, racetrack, skatepark,range,marina,harbor,*velodrome,regatta course
+Football|Name a sports league|NFL,NBA,MLB,NHL,MLS,WNBA,Premier League,La Liga,Bundesliga,Serie A,Ligue 1,UEFA Champions League,ATP Tour,WTA Tour,PGA Tour,Formula One,NASCAR,Major League Rugby,IPL,Big Bash League,*EuroLeague,NPB,KBO,Super Rugby
+Golf|Name a sports tournament or trophy|World Cup,Olympics,Super Bowl,World Series,Stanley Cup,NBA Finals,Champions League,Wimbledon,US Open,The Masters,PGA Championship,The Open,Ryder Cup,Daytona 500,Indianapolis 500,March Madness,Triple Crown,Heisman Trophy,Ballon d'Or,Claret Jug,*Conn Smythe Trophy,Calcutta Cup
+Racing|Name an individual sport|golf,tennis,boxing,swimming,diving,cycling,running,wrestling,surfing,skiing,skateboarding,archery,fencing,judo,weightlifting,shooting,darts,billiards,triathlon,climbing,figure skating,horse racing,auto racing,*orienteering,modern pentathlon
+` .replace(/, /g,",").trim().split("\n").map(s=>{const[b,q,a]=s.split("|");return{b,q,id:"sports:"+q,items:parse(a)}});
+const sportsTier=(c,i)=>{const n=c.items.length;if(c.items[i].cl&&i<n-2)return ST[1];const f=i/n;return f<.12?ST[0]:f<.4?ST[2]:f<.7?ST[3]:i>=n-2?ST[5]:ST[4]};
+function buildSports(r){return shuf(SPORTDATA,r).slice(0,10).map(c=>{c={...c,sports:1};return{c,b:c.b,id:c.id,text:c.q,sports:1}});}
+const $=id=>document.getElementById(id),fmt=n=>n.toLocaleString("en-US");
+const store={get(k,d){try{return JSON.parse(localStorage.getItem(k))??d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+const lev=(a,b)=>{if(Math.abs(a.length-b.length)>1)return 9;const m=[];for(let i=0;i<=a.length;i++)m[i]=[i];for(let j=1;j<=b.length;j++)m[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++)m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]==b[j-1]?0:1));return m[a.length][b.length]};
+const rng=s=>{let h=1779033703^s.length;for(let i=0;i<s.length;i++){h=Math.imul(h^s.charCodeAt(i),3432918353);h=h<<13|h>>>19}let a=h;return()=>{a|=0;a=a+1831565813|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}};
+const shuf=(a,r)=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(r()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+const DAY0=Date.UTC(2026,10,1),dayN=()=>{const d=new Date();return Math.floor((Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())-DAY0)/864e5)};
+function tierOf(c,i){return c.sports?sportsTier(c,i):(()=>{const n=c.items.length;if(c.items[i].cl&&i<n-2)return T[1];const f=i/n;return f<.12?T[0]:f<.4?T[2]:f<.7?T[3]:i>=n-2?T[5]:T[4]})()}
+const letters=c=>{const n={};c.items.forEach(it=>{const l=it.n[0][0];n[l]=(n[l]||0)+1});return Object.keys(n).filter(l=>n[l]>=4&&n[l]<=c.items.length*.6)};
+function mk(t,r){let l=null;if(t.gen){const ls=letters(t);if(ls.length&&r()<.5)l=ls[Math.floor(r()*ls.length)]}return{c:t,b:t.b,l,text:t.gen?"Name "+t.k+(l?" that starts with “"+l.toUpperCase()+"”":""):t.q}}
+function build(r,broad,avoid){const pick=a=>{const f=avoid?a.filter(t=>!avoid.has(t.id)):a;const z=f.length?f:a;return z[Math.floor(r()*z.length)]};
+ if(!broad)return shuf(BR,r).map(b=>mk(pick(ALL.filter(t=>t.b==b)),r));
+ const pool=shuf(ALL.filter(t=>t.b==broad),r),o=avoid?[...pool.filter(t=>!avoid.has(t.id)),...pool.filter(t=>avoid.has(t.id))]:pool;
+ const out=o.slice(0,7).map(t=>mk(t,r));for(let i=0;out.length<7;i++)out.push(mk(pool[i%pool.length],r));return out}
+const eligible=p=>p.c.items.map((it,i)=>({it,i})).filter(o=>!p.l||o.it.n[0][0]==p.l);
+const ph=s=>s.replace(/ph/g,"f").replace(/ck/g,"k").replace(/^kn/,"n").replace(/^wr/,"r").replace(/x/g,"ks").replace(/qu/g,"k").replace(/c(?=[eiy])/g,"s").replace(/c/g,"k").replace(/z/g,"s").replace(/y/g,"i").replace(/[aeiou]+/g,"a").replace(/(.)\1+/g,"$1");
+const dl=(a,b)=>{const m=[];for(let i=0;i<=a.length;i++)m[i]=[i];for(let j=1;j<=b.length;j++)m[0][j]=j;for(let i=1;i<=a.length;i++)for(let j=1;j<=b.length;j++){m[i][j]=Math.min(m[i-1][j]+1,m[i][j-1]+1,m[i-1][j-1]+(a[i-1]==b[j-1]?0:1));if(i>1&&j>1&&a[i-1]==b[j-2]&&a[i-2]==b[j-1])m[i][j]=Math.min(m[i][j],m[i-2][j-2]+1)}return m[a.length][b.length]};
+const sk=s=>ph(s).replace(/a/g,"");
+const tol=n=>n<=4?0:n<=6?1:n<=9?2:3;
+function judge(p,raw){const a=norm(raw);if(!a)return null;const w=raw.trim().split(/\s+/),lw=w.length>1?norm(w[w.length-1]):null,pool=eligible(p);
+ let h=pool.find(o=>o.it.n.includes(a)),fz=false;
+ for(let k=1;!h&&k<w.length;k++){const s=norm(w.slice(-k).join(""));if(s.length>=4)h=pool.find(o=>o.it.n.includes(s))}
+ if(!h){let best=1e9;const C=[a];for(let k=1;k<w.length;k++){const s=norm(w.slice(-k).join(""));if(s.length>=4)C.push(s)}pool.forEach(o=>o.it.n.forEach(x=>C.forEach(c=>{const m=tol(Math.max(x.length,c.length));let d=dl(x,c);if(d>m&&x.length>=5&&(ph(x)==ph(c)||(sk(x).length>=3&&sk(x)==sk(c))))d=1;if(d<=m&&d<best){best=d;h=o;fz=true}})))}
+ const tiers=p.sports?ST:T;return h&&{word:h.it.w,idx:tiers.indexOf(tierOf(p.c,h.i)),fix:fz}}
+function samples(p){const pool=eligible(p).map(o=>[o.it.w,tierOf(p.c,o.i)]),tiers=p.sports?ST:T;return tiers.map(t=>{const m=pool.filter(o=>o[1]==t);return m.length?t[0]+": "+m[Math.floor(Math.random()*m.length)][0]:null}).filter(Boolean).join("  ·  ")}
+// pixel sprites
+const pix=(rows,pal,px,x=0,y=0)=>rows.map((r,j)=>[...r].map((ch,i)=>pal[ch]?`<rect x="${x+i*px}" y="${y+j*px}" width="${px}" height="${px}" fill="${pal[ch]}"/>`:"").join("")).join("");
+const spr=(rows,pal,px)=>`<svg width="${rows[0].length*px}" height="${rows.length*px}" shape-rendering="crispEdges">${pix(rows,pal,px)}</svg>`;
+const FISH=["....cccc.....","..ccccccc..c.",".cwkcccccccc.","ccccccccccccc",".ccccccccc.c.","...cccccc..c."];
+const SHR=["..rrr.....",".r...r....","r.rrrrr...","..rrrrrr..","...rrrrrr.","....rrrr.r","...rr.rr..","..r....r.."];
+const BOAT=["..rr........","..rrr.......","..k.........","..k.........","kkkkkkkkkkk.",".kkkkkkkkkk.","..kkkkkkkk.."];
+const fishSvg=(c,px)=>spr(FISH,{c,w:"#fff",k:"#001"},px),shrSvg=px=>spr(SHR,{r:"#ff4f6b"},px);
+// ruler
+const K=.35;let rh="";for(let m=0;m<=7000;m+=100){rh+=`<div class="tk${m%200?"":" l"}" style="top:${m*K}px">${m%200==0?"<span>-"+fmt(m)+"m</span>":""}</div>`}
+$("rin").innerHTML=rh;$("rin").style.height=7000*K+"px";$("shrimp").innerHTML=shrSvg(5);
+// living ocean (canvas): colour follows depth, particles streak upward while diving
+const cv=$("sea"),g=cv.getContext("2d");let W,H;const rs=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight};addEventListener("resize",rs);rs();
+let dep=0,vel=0,tv=0,last=performance.now();
+const snow=Array.from({length:120},()=>({x:Math.random(),y:Math.random(),z:Math.random()*.9+.1}));
+const bub=Array.from({length:28},(_,i)=>({x:Math.random(),y:Math.random(),r:Math.random()*5+2,s:Math.random()*.5+.5,i}));
+const fsh=Array.from({length:6},(_,i)=>({x:Math.random(),y:.1+Math.random()*.8,s:(.015+Math.random()*.03)*(i%2?1:-1),z:.5+Math.random()}));
+function drawSports(n){
+  const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,"#0b131d");gr.addColorStop(1,"#03070b");g.fillStyle=gr;g.fillRect(0,0,W,H);
+  const glow=g.createRadialGradient(W/2,H*.48,0,W/2,H*.48,Math.max(W,H)*.7);glow.addColorStop(0,"rgba(38,74,86,.16)");glow.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=glow;g.fillRect(0,0,W,H);
+  const cat=S&&S.ps&&S.ps[S.i]?S.ps[S.i].b:"", edge=W<700?W*.82:W*.13, base=H*.78, t=n/1000;
+  const ball=(x,y,r,c,detail)=>{g.fillStyle=c;g.beginPath();g.arc(x,y,r,0,7);g.fill();g.strokeStyle=detail||"rgba(255,255,255,.45)";g.lineWidth=Math.max(1,r*.07);g.stroke()};
+  const shadow=(x,y,rx)=>{g.fillStyle="rgba(0,0,0,.42)";g.beginPath();g.ellipse(x,y,rx,Math.max(2,rx*.22),0,0,7);g.fill()};
+  g.save();g.globalAlpha=.48;g.lineCap="round";
+  if(cat==="Basketball"){
+    const y=base-Math.abs(Math.sin(t*2.4))*82;shadow(edge,base+4,25);ball(edge,y,24,"#d27a32","#ffd39a");g.strokeStyle="rgba(35,15,5,.72)";g.lineWidth=3;g.beginPath();g.arc(edge,y,24,-1.1,1.1);g.stroke();g.beginPath();g.moveTo(edge-24,y);g.quadraticCurveTo(edge,y+7,edge+24,y);g.stroke();
+  }else if(cat==="Football"){
+    const x=edge+Math.sin(t)*28,y=base-24-Math.abs(Math.sin(t*1.7))*12;g.save();g.translate(x,y);g.rotate(t*2);g.fillStyle="#9a5a32";g.beginPath();g.ellipse(0,0,34,21,0,0,7);g.fill();g.strokeStyle="#f1d1a5";g.lineWidth=3;g.stroke();g.beginPath();g.moveTo(-9,0);g.lineTo(9,0);g.stroke();g.restore();
+  }else if(cat==="Baseball"){
+    const x=edge+Math.sin(t*1.4)*28,y=base-38;shadow(x,base+4,18);ball(x,y,17,"#e9e7dc","#d96565");g.strokeStyle="#c54d56";g.lineWidth=2;g.beginPath();g.arc(x,y,10,-1.3,.3);g.stroke();g.beginPath();g.arc(x,y,10,1.8,3.4);g.stroke();
+  }else if(cat==="Soccer"){
+    const x=edge+((t*.18)%1)*90,y=base-18;shadow(x,base+4,22);g.save();g.translate(x,y);g.rotate(t*4);ball(0,0,21,"#e8edf0","#9fb0bc");g.fillStyle="#273744";for(let i=0;i<5;i++){const a=i*1.256;g.beginPath();g.arc(Math.cos(a)*8,Math.sin(a)*8,4,0,7);g.fill()}g.restore();
+  }else if(cat==="Tennis"){
+    const x=edge+Math.sin(t*1.8)*20,y=base-20-Math.abs(Math.sin(t*1.8))*65;shadow(x,base+4,16);ball(x,y,14,"#d6e94d","#f3ffad");g.strokeStyle="rgba(255,255,255,.8)";g.lineWidth=2;g.beginPath();g.arc(x,y,10,-1.1,.4);g.stroke();
+  }else if(cat==="Golf"){
+    const x=edge+Math.sin(t*.7)*48,y=base-8;g.strokeStyle="#91b78a";g.lineWidth=3;g.beginPath();g.moveTo(edge,base+4);g.lineTo(edge,base-72);g.stroke();g.fillStyle="#d95b68";g.beginPath();g.moveTo(edge,base-72);g.lineTo(edge+30,base-62);g.lineTo(edge,base-51);g.fill();ball(x,y,9,"#e8edf0","#a7b1b9");
+  }else if(cat==="Hockey"){
+    const x=edge+((t*.22)%1)*100,y=base;g.fillStyle="#111820";g.beginPath();g.ellipse(x,y,28,8,0,0,7);g.fill();g.strokeStyle="#a5bac7";g.lineWidth=2;g.stroke();g.strokeStyle="#75d7ef";g.globalAlpha=.7;g.beginPath();g.moveTo(x-44,y+5);g.lineTo(x-15,y+5);g.stroke();
+  }else if(cat==="Olympics"){
+    const x=edge,y=base-25;g.lineWidth=5;[[0,0,"#4db7e5"],[28,0,"#f0c34d"],[56,0,"#e86e75"],[14,25,"#63c98a"],[42,25,"#aa82d8"]].forEach(([dx,dy,c])=>{g.strokeStyle=c;g.beginPath();g.arc(x+dx,y+dy,16,0,7);g.stroke()});
+  }else if(cat==="Racing"){
+    const x=edge+((t*.25)%1)*100,y=base-18;g.fillStyle="#d85a55";g.beginPath();g.roundRect(x-34,y-14,68,27,8);g.fill();g.fillStyle="#b8d4df";g.fillRect(x-10,y-10,20,10);g.fillStyle="#111820";g.beginPath();g.arc(x-21,y+14,8,0,7);g.arc(x+21,y+14,8,0,7);g.fill();
+  }else if(cat==="Cricket"){
+    const x=edge+Math.sin(t)*24,y=base-28;shadow(x,base+4,18);ball(x,y,16,"#b94b4e","#f4c0a3");g.strokeStyle="#eee";g.lineWidth=2;g.beginPath();g.moveTo(x-8,y-12);g.lineTo(x+8,y+12);g.stroke();
+  }
+  g.restore();
+}
+function frame(n){const dt=Math.min(.05,(n-last)/1000);last=n;vel+=(tv-vel)*Math.min(1,dt*3.5);const f=Math.min(1,dep/7000);if(S&&S.sports){drawSports(n);requestAnimationFrame(frame);return}
+ const gr=g.createLinearGradient(0,0,0,H);gr.addColorStop(0,`hsl(${205+8*f},${75-25*f}%,${36*Math.pow(1-f,1.4)+3}%)`);gr.addColorStop(1,`hsl(214,${60-12*f}%,${17*(1-f)+1.2}%)`);g.fillStyle=gr;g.fillRect(0,0,W,H);
+ const ra=.2*Math.max(0,1-f*4);if(ra>.01){g.fillStyle=`rgba(190,238,255,${ra})`;for(let i=0;i<5;i++){const x=W*(.05+i*.22)+Math.sin(n/2500+i)*30;g.beginPath();g.moveTo(x,0);g.lineTo(x+70,0);g.lineTo(x+240-i*30,H);g.lineTo(x+110-i*30,H);g.fill()}}
+ g.fillStyle="rgba(2,8,16,.55)";fsh.forEach(o=>{o.x+=o.s*dt;if(o.x>1.1)o.x=-.1;if(o.x<-.1)o.x=1.1;o.y-=vel*dt*o.z/H;if(o.y<-.1)o.y=1.1;const x=o.x*W,y=o.y*H,s=26*o.z,d=o.s>0?1:-1;g.beginPath();g.ellipse(x,y,s,s*.42,0,0,7);g.fill();g.beginPath();g.moveTo(x-d*s*.8,y);g.lineTo(x-d*s*1.6,y-s*.5);g.lineTo(x-d*s*1.6,y+s*.5);g.fill()});
+ g.fillStyle="rgb(190,225,255)";snow.forEach(o=>{o.y-=(.012*o.z+vel*o.z/H)*dt;if(o.y<-.05)o.y=1.05;const x=o.x*W,y=o.y*H,len=Math.min(70,vel*o.z*.03);g.globalAlpha=.2+.45*o.z;if(len>3)g.fillRect(x,y,1.5,len);else g.fillRect(x,y,2*o.z+.5,2*o.z+.5)});g.globalAlpha=1;
+ bub.forEach(o=>{o.y-=(.05*o.s+vel*.7/H)*dt;if(o.y<-.05){o.y=1.05;o.x=Math.random()}const x=o.x*W+Math.sin(n/700+o.i)*8,y=o.y*H;if(f>.22&&o.i%3==0){const a=Math.min(.9,f*1.1)*(.6+.4*Math.sin(n/500+o.i));g.fillStyle=o.i%2?`rgba(63,217,255,${a})`:`rgba(255,79,139,${a})`;g.shadowColor=g.fillStyle;g.shadowBlur=14;g.beginPath();g.arc(x,y,3,0,7);g.fill();g.shadowBlur=0}else{g.strokeStyle="rgba(200,240,255,.45)";g.lineWidth=1.5;g.beginPath();g.arc(x,y,o.r,0,7);g.stroke()}});
+ const vg=g.createRadialGradient(W/2,H/2,H*.3,W/2,H/2,H*.95);vg.addColorStop(0,"rgba(0,0,0,0)");vg.addColorStop(1,"rgba(0,0,0,.5)");g.fillStyle=vg;g.fillRect(0,0,W,H);
+ requestAnimationFrame(frame)}requestAnimationFrame(frame);
+// sound
+let snd=store.get("snd",true),ac;const AC=window.AudioContext||window.webkitAudioContext;
+function beep(f,d=.12){if(!snd||!AC)return;try{ac=ac||new AC();const o=ac.createOscillator(),k=ac.createGain();o.type="square";o.frequency.value=f;k.gain.value=.04;o.connect(k);k.connect(ac.destination);o.start();k.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.stop(ac.currentTime+d)}catch(e){}}
+const sndUI=()=>{$("snd").textContent=snd?"🔊":"🔇";$("m-sv").textContent=snd?"ON":"OFF"};
+// views
+let S,timer,t0,shown=0,R,busy=0;
+function view(v){["intro","play","end"].forEach(x=>$(x).classList.toggle("hidden",x!=v));const p=v=="play",sp=S&&S.sports;["hud","you"].forEach(x=>$(x).classList.toggle("hidden",!p));["ruler","shrimp"].forEach(x=>$(x).classList.toggle("hidden",!p||sp));
+  $("stage").style.justifyContent=v=="end"?"flex-start":"center";$("stage").style.paddingTop=v=="end"?"40px":"110px";scrollTo(0,0)}
+function setDepth(pts,D){const from=shown,to=pts*10;shown=to;const t=performance.now(),dive=D>0;D=D||700;
+  $("rin").style.transition=`transform ${D}ms cubic-bezier(.45,.05,.3,1)`;$("rin").style.transform="translateY(calc(50vh - "+to*K+"px))";$("hs").textContent=pts;
+  if(dive)tv=Math.min(950,480+(to-from)*.9);
+  (function f(n){const k=Math.min(1,(n-t)/D),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;dep=from+(to-from)*e;$("hd").textContent=S&&S.sports?(S.i+1)+"/10":fmt(Math.round(dep))+"m";if(k<1)requestAnimationFrame(f);else tv=0})(t)}
+function hud(){const total=S.sports?10:7;$('sq').innerHTML=Array.from({length:total},(_,i)=>`<i class="${i<S.log.length?"on":""}"></i>`).join("");$('hl').textContent=S.log.length>=total?(S.sports?"ROUND COMPLETE":"DIVE COMPLETE"):S.label.toUpperCase()}
+function start(key,label,pool,seed,broad){const sports=broad==="sports";let avoid=null;if(!seed&&!broad)avoid=new Set(store.get("seen",[]));
+  const ps=sports?buildSports(seed?rng(seed):Math.random):build(seed?rng(seed):Math.random,broad,avoid);if(avoid)store.set("seen",[...avoid,...ps.map(p=>p.c.id)].slice(-80));
+  S={key,label,pool,broad,seed,ps,i:0,pts:0,log:[],sports};shown=0;dep=0;document.body.classList.toggle("sports-mode",sports);document.title=sports?"EBK Required—Sports":"frillion";document.querySelector("#hud .pn:first-child small").textContent=sports?"ROUND":"DEPTH";document.querySelector("#hud .pn:last-child small").textContent=sports?"POINTS":"SCORE";$("you").textContent=sports?"HOME":"YOU";$("menu").classList.add("hidden");view("play");setDepth(0);ask()}
+function ask(){const p=S.ps[S.i];busy=0;hud();$("pq").classList.remove("hidden");$("pd").classList.add("hidden");$("pr").classList.add("hidden");$("msg").textContent="";
+  $("psp").innerHTML=S.sports?"<div style=\"font-size:42px\">🏆</div>":fishSvg("#3fd9ff",6);$("psp").style.cssText="display:flex;justify-content:center;filter:drop-shadow(0 0 12px #3fd9ff);margin-bottom:10px";
+  $("pn").textContent="PROMPT "+(S.i+1)+" / "+(S.sports?10:7)+" · "+p.b.toUpperCase();$("prompt").textContent=p.text;$("sub").textContent=S.sports?"Score":"Sink";$("pass").textContent=S.sports?"Pass (0 pts)":"Pass (0 pts)";$("ans").value="";$("ans").focus();t0=Date.now();clearInterval(timer);
+  timer=setInterval(()=>{const r=Math.max(0,25-(Date.now()-t0)/1000);$("fill").style.width=r*4+"%";$("tm").textContent=Math.ceil(r)+"s";if(r<=0)settle(null,"",1)},100)}
+function tryAnswer(){if(busy)return;const raw=$("ans").value.trim();if(!raw)return;const j=judge(S.ps[S.i],raw);
+  if(!j){$("msg").textContent="“"+raw+"” isn't on this list. Try again.";$("ans").value="";$("ans").focus();beep(110,.2);const e=$("pq");e.classList.remove("shake");void e.offsetWidth;e.classList.add("shake");return}
+  settle(j,raw,0)}
+function settle(j,raw,to,pass){if(busy)return;busy=1;clearInterval(timer);const p=S.ps[S.i],t=j?(S.sports?ST[j.idx]:T[j.idx]):null,pts=t?t[1]:0;S.pts+=pts;
+  const pool=eligible(p);S.log.push({t:p.text.replace(/^Name /,""),a:j?j.word:"",n:t?t[0]:"",c:t?t[2]:"t0",e:t?t[3]:"⬛",p:pts,top:pool[pool.length-1].it.w});
+  R={j,t,pts,raw,to,pass,p};hud();$("pq").classList.add("hidden");
+  if(pts>0){const D=S.sports?850+pts*7:1900+pts*14,col=COL[t[2]];$("pd").classList.remove("hidden");$("dsp").innerHTML=S.sports?"<div style=\"font-size:54px\">🏆</div>":(pts>=60?shrSvg(7):fishSvg(col,7));$("dsp").style.filter="drop-shadow(0 0 14px "+col+")";$("dt").style.color=col;$("dt").textContent=t[0].toUpperCase();$("da").textContent="“"+j.word+"”";$("dp").style.color=col;$("dp").textContent="+"+pts+" POINTS";$("dmm").textContent=S.sports?"on the board":"sink "+fmt(pts*10)+"m";$("dm").textContent=j.fix?"spelling corrected from “"+raw+"”":(S.sports?"keep your eye on the ball":"sinking…");
+    beep(200+j.idx*110,.2);setDepth(S.pts,D);setTimeout(show,D+300)}else{beep(110,.3);show()}}
+function show(){const{j,t,pts,raw,to,pass,p}=R,col=t?COL[t[2]]:"#6f8fb0";$("pd").classList.add("hidden");$("pr").classList.remove("hidden");
+  $("rsp").innerHTML=S.sports?"<div style=\"font-size:54px\">🏆</div>":(pts>=60?shrSvg(7):fishSvg(col,7));$("rsp").style.cssText="display:flex;justify-content:center;filter:drop-shadow(0 0 14px "+col+")";
+  $("rt").style.color=col;$("rt").textContent=t?t[0].toUpperCase():(pass?"PASSED":"OUT OF AIR");
+  $("ra").textContent=j?"“"+j.word+"”":"…";$("rp").textContent="+"+pts+(S.sports?" POINTS":" PTS");$("rp").style.color=col;$("rm").textContent=pts?(S.sports?"on the board":"sink "+fmt(pts*10)+"m"):(S.sports?"no points":"no descent");
+  $("rf").textContent=t?t[4]+(j.fix?" · spelling corrected from “"+raw+"”":""):(pass?(S.sports?"You stayed on the bench.":"You held your position."):(S.sports?"Time expired. The clock wins.":"Time ran out. Nothing but open water."));$("rs").textContent="Also accepted — "+samples(p);
+  $("next").textContent=S.i==(S.sports?9:6)?(S.sports?"Final whistle":"Surface ▲"):(S.sports?"Next play":"Sink ▼");$("next").focus()}
+// end screen
+const gam=x=>x*x*Math.exp(-x/100);
+function curve(pts){const max=S&&S.sports?1000:700;let tot=0,cum=0;for(let x=0;x<=max;x++)tot+=gam(x);for(let x=0;x<=pts;x++)cum+=gam(x);
+  const fm=gam(200),X=x=>40+x*780/max,Y=x=>170-gam(x)/fm*140;let d="M"+X(0)+","+Y(0);for(let x=5;x<=max;x+=5)d+=" L"+X(x)+","+Y(x);
+  let a="M"+X(0)+",170";for(let x=0;x<=pts;x+=5)a+=" L"+X(x)+","+Y(x);a+=" L"+X(pts)+",170Z";
+  let ax="";for(let v=0;v<=max;v+=S&&S.sports?200:100)ax+=`<text x="${X(v)}" y="195" fill="#6f8fb0" font-size="15" text-anchor="middle">${v}</text>`;
+  $("curve").innerHTML=`<svg viewBox="0 0 860 200"><path d="${a}" fill="rgba(63,217,255,.22)"/><path d="${d}" fill="none" stroke="#3fd9ff" stroke-width="3"/><line x1="${X(pts)}" x2="${X(pts)}" y1="${Y(pts)}" y2="170" stroke="#ff4f8b" stroke-width="2"/><circle cx="${X(pts)}" cy="${Y(pts)}" r="6" fill="#ff4f8b"/><text x="${X(pts)}" y="188" fill="#ff4f8b" font-size="15" text-anchor="middle">YOU</text>${ax}</svg>`;
+  $("pct").textContent="BETTER THAN "+Math.round(cum/tot*100)+"% OF TYPICAL DIVES"}
+function dlog(log){if(S&&S.sports){let s=`<svg viewBox="0 0 860 330"><rect width="860" height="330" fill="#123b29" opacity=".95"/><path d="M40 60H820M40 135H820M40 210H820M40 285H820" stroke="#42e6a4" opacity=".22"/>`;log.forEach((l,i)=>{const x=58+i*78,w=50,h=Math.max(3,l.p*2.3),y=285-h;s+=`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${COL[l.c]||"#6f8fb0"}"/><text x="${x+w/2}" y="${y-7}" fill="#d8ecff" font-size="15" text-anchor="middle">${l.p}</text><text x="${x+w/2}" y="310" fill="#bce8cf" font-size="13" text-anchor="middle">${i+1}</text>`});$("dlog").innerHTML=s+"</svg>";return}const Wd=860,X0=70,gp=(Wd-2*X0)/7;let s=`<svg viewBox="0 0 860 330"><rect y="60" width="860" height="270" fill="#07182b" opacity=".8"/><line x1="40" x2="820" y1="60" y2="60" stroke="#35557a" stroke-dasharray="4 6"/>${pix(BOAT,{r:"#ff4f6b",k:"#050a14"},9,20,-3)}`;
+  [0,25,50,75,100].forEach(v=>{s+=`<text x="40" y="${64+v*2.4}" fill="#6f8fb0" font-size="14" text-anchor="end">${v?"-"+v:"0m"}</text><line x1="55" x2="820" y1="${60+v*2.4}" y2="${60+v*2.4}" stroke="#15273d" stroke-dasharray="4 6"/>`});
+  log.forEach((l,i)=>{const x=X0+gp*(i+.5),y=60+l.p*2.4;if(!l.p)s+=`<circle cx="${x}" cy="44" r="8" fill="none" stroke="#6fa6d8" stroke-width="2"/>`;else s+=`<line x1="${x}" x2="${x}" y1="60" y2="${y}" stroke="${l.p>=60?"#ff4f6b":"#3fd9ff"}" opacity=".8"/>`+(l.p>=60?pix(SHR,{r:"#ff4f6b"},4,x-20,y-6):pix(FISH,{c:"#3fd9ff",w:"#fff",k:"#001"},3,x-19,y-9))});
+  $("dlog").innerHTML=s+"</svg>"}
+function end(pts,log,label,again){S=S||{};S.pts=pts;S.log=log;S.label=label;dep=pts*10;shown=dep;const sp=S.sports;
+  document.body.classList.toggle("sports-mode",!!sp);$("elab").textContent=label.toUpperCase()+" COMPLETE";$("escore").textContent=pts;$("edepth").textContent=sp?"POINTS":"-"+fmt(pts*10)+"m";$("escore").style.color=sp?"#42e6a4":"";$("pct").textContent=sp?"A SOLID SCORECARD":"";$("dlog").previousElementSibling.innerHTML=sp?"SCORECARD <span style=\"opacity:.6\">EACH PLAY COUNTS</span>":"DIVE LOG <span style=\"opacity:.6\">DEEPER = RARER</span>";$("recap").previousElementSibling.textContent=sp?"ANSWERS & SCORING":"ANSWERS & DEEPEST POSSIBLE";
+  curve(pts);dlog(log);$("recap").innerHTML="";log.forEach(l=>{const tr=document.createElement("tr"),a=document.createElement("td");a.innerHTML="<b></b><div class='sm'></div>";a.querySelector("b").textContent=l.t;a.querySelector(".sm").textContent="You: "+(l.a||"—")+" · Deepest: "+l.top;
+    const b=document.createElement("td");b.className=l.c;b.style.textAlign="right";b.textContent=(l.n?l.n+" ":"")+"+"+l.p;tr.append(a,b);$("recap").append(tr)});
+  $("again").classList.toggle("hidden",!again);$("menu").classList.add("hidden");view("end")}
+function finish(){const st=store.get("stats",{n:0,best:0});st.n++;st.best=Math.max(st.best,S.pts);store.set("stats",st);
+  if(S.key){const Rs=store.get("res",{});Rs[S.key]={pts:S.pts,log:S.log};store.set("res",Rs)}end(S.pts,S.log,S.label,!S.key)}
+// menu + home
+function menu(){const Rs=store.get("res",{}),d=dayN(),mk2=(p,l,r,f)=>{const b=document.createElement("button");b.className="btn";b.innerHTML="<span></span><span class='sm'></span>";b.firstChild.textContent=l;b.lastChild.textContent=r;b.onclick=f;p.append(b)};
+  const daily=k=>Rs["d"+k]?end(Rs["d"+k].pts,Rs["d"+k].log,"Dive #"+(k+1),false):start("d"+k,"Dive #"+(k+1),0,"krill"+k);
+  $("m-ds").textContent=Rs["d"+d]?Rs["d"+d].pts*10+"m ✓":"#"+(d+1);$("m-d").onclick=()=>daily(d);$("m-u").onclick=()=>start(null,"Unlimited dive");$("m-sports").onclick=()=>start(null,"EBK Required—Sports",0,null,"sports");
+  $("m-p").innerHTML="";BR.forEach(k=>mk2($("m-p"),k,"pack",()=>start(null,k+" pack",0,null,k)));
+  $("m-a").innerHTML="";for(let k=d-1;k>=Math.max(0,d-30);k--)mk2($("m-a"),"#"+(k+1)+" · "+new Date(DAY0+k*864e5).toISOString().slice(5,10),Rs["d"+k]?Rs["d"+k].pts*10+"m ✓":"play",()=>daily(k));
+  if(d==0)$("m-a").innerHTML="<span class='sm'>No past dives yet.</span>";sndUI()}
+function home(){clearInterval(timer);document.body.classList.remove("sports-mode");document.title="frillion";menu();const Rs=store.get("res",{}),d=dayN(),st=store.get("stats",{n:0,best:0});dep=0;shown=0;
+  $("stats").textContent="Dives: "+st.n+" · Deepest: "+fmt(st.best*10)+"m";$("go").onclick=()=>$("m-d").click();
+  if(Rs["d"+d])end(Rs["d"+d].pts,Rs["d"+d].log,"Dive #"+(d+1),false);else{$("menu").classList.add("hidden");view("intro")}}
+$("burger").onclick=()=>{menu();$("menu").classList.remove("hidden")};$("mx").onclick=()=>$("menu").classList.add("hidden");
+$("snd").onclick=$("m-snd").onclick=()=>{snd=!snd;store.set("snd",snd);sndUI();beep(440)};
+$("m-rs").onclick=()=>{if(confirm("Erase all dives and stats on this device?")){try{localStorage.clear()}catch(e){}location.reload()}};
+$("sub").onclick=tryAnswer;$("ans").onkeydown=e=>{if(e.key=="Enter")tryAnswer()};$("pass").onclick=()=>settle(null,"",0,1);
+$("next").onclick=()=>S.i==(S.sports?9:6)?finish():(S.i++,ask());
+$("again").onclick=()=>start(null,S.label,0,null,S.broad);$("home").onclick=()=>{menu();$("menu").classList.remove("hidden")};
+$("share").onclick=()=>{const t=(S.sports?"EBK Required—Sports":"frillion · "+S.label)+"\n"+S.pts+" "+(S.sports?"points":"pts · -"+fmt(S.pts*10)+"m")+"\n"+S.log.map(l=>l.e).join("");
+  (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>$("share").textContent="Copied!").catch(()=>prompt("Copy:",t))};
+home();
+</script></body></html>

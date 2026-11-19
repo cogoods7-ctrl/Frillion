@@ -93,8 +93,8 @@ body.sports-mode .tbar i{background:#42e6a4}
  <h3>EBK REQUIRED</h3><button class="btn" id="m-sports"><span>EBK Required—Sports</span><span class="sm">10 prompts · all sports</span></button>
  <h3>THEMED PACKS</h3><div id="m-p" style="display:flex;flex-direction:column;gap:10px"></div>
  <h3>ARCHIVE</h3><div id="m-a" style="display:flex;flex-direction:column;gap:10px"></div>
- <h3>SETTINGS</h3><button class="btn" id="m-snd"><span>Sound</span><span id="m-sv"></span></button><button class="btn" id="m-exp"><span>Export today's daily pack (JSON)</span><span>⇩</span></button><button class="btn" id="m-rs"><span>Reset all progress</span><span>⚠</span></button>
- <h3>FAQ</h3><p class="sm" style="margin:0">Questions are generated live from Wikidata, so there is no fixed list. A question only runs if it has 50+ valid answers and enough well-known ones to be fair. Rarity comes from how widely known each answer is (Wikipedia language editions). Answers not in the listed pool are checked live. Wrong answers can be retried until the timer runs out. The daily dive uses a date seed; for identical questions for everyone, host a pre-built pack (see CFG.PACK_URL).</p>
+ <h3>SETTINGS</h3><button class="btn" id="m-snd"><span>Sound</span><span id="m-sv"></span></button><button class="btn" id="m-dif"><span>Question difficulty (not daily)</span><span id="m-dv"></span></button><button class="btn" id="m-fz"><span>Spelling correction</span><span id="m-fv"></span></button><button class="btn" id="m-exp"><span>Export today's daily pack (JSON)</span><span>⇩</span></button><button class="btn" id="m-rs"><span>Reset all progress</span><span>⚠</span></button>
+ <h3>FAQ</h3><p class="sm" style="margin:0">Questions are generated live from Wikidata, so there is no fixed list. A question only runs if it has 50+ valid answers and enough well-known ones to be fair. Rarity comes from how widely known each answer is (Wikipedia language editions). Answers not in the listed pool are checked live. Questions default to Easy (the best answer must be widely known and 25+ answers well-known); the daily dive is always Easy. Spelling correction is strict: one typo, a single unambiguous match, and never when what you typed is a real thing itself. Wrong answers can be retried until the timer runs out. The daily dive uses a date seed; for identical questions for everyone, host a pre-built pack (see CFG.PACK_URL).</p>
 </div></div>
 <script>
 const T=[["Plankton",10,"t0","⬜","Everyone's first thought. Barely a ripple."],["Too Clever",15,"t1","🟪","Too clever - everyone zigs the same way."],["Schooler",30,"t2","🟦","Solid - swims with the school."],["Rare",60,"t3","🟩","Rare find - few swim this deep."],["Deep Cut",85,"t4","🟧","Deep cut - it's dark down here."],["One in a Trench",100,"t5","🟥","Trench floor. Nobody comes down here."]];
@@ -121,7 +121,7 @@ function parse(a,cl){return a.split(",").map(s=>{s=s.trim();const c=s[0]=="*";if
  const t=al.map(x=>tokq(x).map(stm)),n=[...new Set(t.map(x=>x.join("")).filter(Boolean))];
  return{w,n,t,cl:c||(!!cl&&cl.split(",").includes(w)),f:strip(w)[0]||""}})}
 const merge=(...ls)=>{const seen=new Set(),out=[];ls.join(",").split(",").forEach(s=>{s=s.trim();if(!s)return;const ks=s.replace(/^\*/,"").split("/").map(keyOf);if(ks.some(k=>seen.has(k)))return;ks.forEach(k=>seen.add(k));out.push(s)});return out.join(",")};
-const BR=["Geography","Food & Drink","Nature & Science","Arts & Entertainment","Sports & Games","History & Culture","Tech"];
+const BR=["Geography","Food & drink","Sports","Music","Film & TV","Brands","Nature","General knowledge"];
 // ===== DYNAMIC QUESTION ENGINE (Wikidata) =====
 // Framework rules every generated question must pass before a player ever sees it:
 //   R1  answer pool >= MIN_POOL distinct answers      R2  >= MIN_KNOWN well-known answers (so it is answerable)
@@ -131,28 +131,44 @@ const CFG={ENDPOINT:"https://query.wikidata.org/sparql",API:"https://www.wikidat
 const COUNTRIES=[["Q30","United States","the United States"],["Q145","United Kingdom","the United Kingdom"],["Q142","France","France"],["Q183","Germany","Germany"],["Q38","Italy","Italy"],["Q29","Spain","Spain"],["Q17","Japan","Japan"],["Q148","China","China"],["Q668","India","India"],["Q16","Canada","Canada"],["Q408","Australia","Australia"],["Q155","Brazil","Brazil"],["Q159","Russia","Russia"],["Q96","Mexico","Mexico"],["Q414","Argentina","Argentina"],["Q55","Netherlands","the Netherlands"],["Q34","Sweden","Sweden"],["Q36","Poland","Poland"]];
 const CONTS=[["Q46","Europe"],["Q48","Asia"],["Q15","Africa"],["Q49","North America"],["Q18","South America"],["Q55643","Oceania"]];
 // [qid, expected English label, phrase, broad category, sports-mode label]
-const SIMPLE=[["Q4022","river","river","Geography"],["Q8502","mountain","mountain","Geography"],["Q23397","lake","lake","Geography"],["Q23442","island","island","Geography"],["Q3624078","sovereign state","country","Geography"],["Q46169","national park","national park","Geography"],["Q12280","bridge","bridge","Geography"],["Q11303","skyscraper","skyscraper","Geography"],["Q515","city","city","Geography"],["Q39367","dog breed","dog breed","Nature & Science"],["Q11344","chemical element","chemical element","Nature & Science"],["Q134768","cocktail","cocktail","Food & Drink"],["Q10943","cheese","cheese","Food & Drink"],["Q746549","dish","dish","Food & Drink"],["Q9143","programming language","programming language","Tech"],["Q9135","operating system","operating system","Tech"],["Q6368","web browser","web browser","Tech"],["Q8076","video game console","video game console","Tech"],["Q7889","video game","video game","Sports & Games"],["Q34379","musical instrument","musical instrument","Arts & Entertainment"],["Q34770","language","language","History & Culture"],["Q11424","film","film","Arts & Entertainment"],["Q5398426","television series","TV series","Arts & Entertainment"],["Q23413","castle","castle","History & Culture"],["Q33506","museum","museum","History & Culture"],["Q3918","university","university","History & Culture"],["Q31629","type of sport","sport","Sports & Games","All Sports"]];
-const COUNTRY_CLS=[["Q3918","university","university","History & Culture"],["Q23413","castle","castle","History & Culture"],["Q33506","museum","museum","History & Culture"],["Q483110","stadium","stadium","Sports & Games","Venues"],["Q46169","national park","national park","Geography"],["Q12280","bridge","bridge","Geography"],["Q11303","skyscraper","skyscraper","Geography"],["Q4022","river","river","Geography"],["Q8502","mountain","mountain","Geography"],["Q23397","lake","lake","Geography"],["Q23442","island","island","Geography"],["Q515","city","city","Geography"],["Q1248784","airport","airport","Geography"],["Q476028","association football club","football club","Sports & Games","Soccer",1]];
+const SIMPLE=[["Q4022","river","river","Geography"],["Q8502","mountain","mountain","Geography"],["Q23397","lake","lake","Geography"],["Q23442","island","island","Geography"],["Q3624078","sovereign state","country","Geography"],["Q46169","national park","national park","Geography"],["Q12280","bridge","bridge","Geography"],["Q11303","skyscraper","skyscraper","Geography"],["Q515","city","city","Geography"],["Q39367","dog breed","dog breed","Nature & Science"],["Q11344","chemical element","chemical element","Nature & Science"],["Q134768","cocktail","cocktail","Food & Drink"],["Q10943","cheese","cheese","Food & Drink"],["Q746549","dish","dish","Food & Drink"],["Q9143","programming language","programming language","Tech"],["Q9135","operating system","operating system","Tech"],["Q6368","web browser","web browser","Tech"],["Q8076","video game console","video game console","Tech"],["Q7889","video game","video game","Sports & Games"],["Q34379","musical instrument","musical instrument","Arts & Entertainment"],["Q34770","language","language","History & Culture"],["Q11424","film","film","Arts & Entertainment"],["Q5398426","television series","TV series","Arts & Entertainment"],["Q23413","castle","castle","History & Culture"],["Q33506","museum","museum","History & Culture"],["Q3918","university","university","History & Culture"],["Q31629","type of sport","sport","Sports & Games","All Sports"],["Q7366","song","song","Music"],["Q215380","musical group","band or musical group","Music"],["Q482994","album","album","Music"],["Q1569167","video game character","video game character","Film & TV"],["Q3966183","Pokémon species","Pokémon","Film & TV"],["Q431289","brand","brand","Brands"],["Q786803","automobile manufacturer","car brand","Brands"],["Q46970","airline","airline","Brands"],["Q28640","profession","job","General knowledge"],["Q47574","unit of measurement","unit of measurement","General knowledge"],["Q3314483","fruit","fruit","Food & Drink"],["Q11004","vegetable","vegetable","Food & Drink"],["Q40050","drink","drink","Food & Drink"],["Q42527","spice","spice","Food & Drink"]];
+const COUNTRY_CLS=[["Q3918","university","university","History & Culture"],["Q23413","castle","castle","History & Culture"],["Q33506","museum","museum","History & Culture"],["Q483110","stadium","stadium","Sports & Games","Venues"],["Q46169","national park","national park","Geography"],["Q4022","river","river","Geography"],["Q8502","mountain","mountain","Geography"],["Q23397","lake","lake","Geography"],["Q23442","island","island","Geography"],["Q515","city","city","Geography"],["Q476028","association football club","football club","Sports & Games","Soccer",1]];
 const ORIGIN_CLS=[["Q11424","film","film","Arts & Entertainment"],["Q5398426","television series","TV series","Arts & Entertainment"],["Q746549","dish","dish","Food & Drink"],["Q10943","cheese","cheese","Food & Drink"]];
 const CONT_CLS=[["Q3624078","sovereign state","country","Geography"],["Q4022","river","river","Geography"],["Q8502","mountain","mountain","Geography"],["Q23397","lake","lake","Geography"],["Q515","city","city","Geography"]];
 const OCC=[["Q1028181","painter","painter","Arts & Entertainment"],["Q33999","actor","actor","Arts & Entertainment"],["Q2526255","film director","film director","Arts & Entertainment"],["Q177220","singer","singer","Arts & Entertainment"],["Q36834","composer","composer","Arts & Entertainment"],["Q36180","writer","writer","Arts & Entertainment"],["Q6625963","novelist","novelist","Arts & Entertainment"],["Q49757","poet","poet","Arts & Entertainment"],["Q1281618","sculptor","sculptor","Arts & Entertainment"],["Q33231","photographer","photographer","Arts & Entertainment"],["Q245068","comedian","comedian","Arts & Entertainment"],["Q42973","architect","architect","Arts & Entertainment"],["Q169470","physicist","physicist","Nature & Science"],["Q593644","chemist","chemist","Nature & Science"],["Q170790","mathematician","mathematician","Nature & Science"],["Q11063","astronomer","astronomer","Nature & Science"],["Q11631","astronaut","astronaut","Nature & Science"],["Q205375","inventor","inventor","Nature & Science"],["Q82955","politician","politician","History & Culture"],["Q11900058","explorer","explorer","History & Culture"],["Q4964182","philosopher","philosopher","History & Culture"],["Q188094","economist","economist","History & Culture"],["Q3499072","chef","chef","Food & Drink"],["Q3665646","basketball player","basketball player","Sports & Games","Basketball"],["Q937857","association football player","soccer player","Sports & Games","Soccer"],["Q19204627","American football player","American football player","Sports & Games","Football"],["Q10871364","baseball player","baseball player","Sports & Games","Baseball"],["Q11774891","ice hockey player","ice hockey player","Sports & Games","Hockey"],["Q10833314","tennis player","tennis player","Sports & Games","Tennis"],["Q11303721","golfer","golfer","Sports & Games","Golf"],["Q378622","racing driver","racing driver","Sports & Games","Motorsport"],["Q11338576","boxer","boxer","Sports & Games","Combat"],["Q10843402","swimmer","swimmer","Sports & Games","Olympics"],["Q11513337","athletics competitor","track and field athlete","Sports & Games","Olympics"],["Q12299841","cricketer","cricketer","Sports & Games","Cricket"],["Q2309784","cyclist","cyclist","Sports & Games","Cycling"],["Q10873124","chess player","chess player","Sports & Games","Games"]];
 const TEAMS=[["Q8682","Real Madrid","Real Madrid","Soccer"],["Q7156","Barcelona","FC Barcelona","Soccer"],["Q18656","Manchester United","Manchester United","Soccer"],["Q1130849","Liverpool","Liverpool","Soccer"],["Q9616","Chelsea","Chelsea","Soccer"],["Q9617","Arsenal","Arsenal","Soccer"],["Q15789","Bayern Munich","Bayern Munich","Soccer"],["Q1422","Juventus","Juventus","Soccer"],["Q1543","AC Milan","AC Milan","Soccer"],["Q631","Inter Milan","Inter Milan","Soccer"],["Q483020","Paris Saint-Germain","Paris Saint-Germain","Soccer"],["Q50602","Manchester City","Manchester City","Soccer"],["Q121783","Los Angeles Lakers","the Los Angeles Lakers","Basketball"],["Q131371","Boston Celtics","the Boston Celtics","Basketball"],["Q128109","Chicago Bulls","the Chicago Bulls","Basketball"],["Q157376","Golden State Warriors","the Golden State Warriors","Basketball"],["Q213417","New York Yankees","the New York Yankees","Baseball"],["Q213959","Boston Red Sox","the Boston Red Sox","Baseball"]];
 const AWARDS=[["Q38104","Nobel Prize in Physics","Nobel Prize in Physics","Nature & Science"],["Q44585","Nobel Prize in Chemistry","Nobel Prize in Chemistry","Nature & Science"],["Q80061","Nobel Prize in Physiology or Medicine","Nobel Prize in Physiology or Medicine","Nature & Science"],["Q37922","Nobel Prize in Literature","Nobel Prize in Literature","Arts & Entertainment"],["Q35637","Nobel Peace Prize","Nobel Peace Prize","History & Culture"],["Q103916","Academy Award for Best Actor","Academy Award for Best Actor","Arts & Entertainment"],["Q103618","Academy Award for Best Actress","Academy Award for Best Actress","Arts & Entertainment"],["Q166177","Ballon d'Or","Ballon d'Or","Sports & Games","Soccer"]];
-const art=n=>/^[aeiou]/i.test(n)?"an":"a";
-const TPLS=[];const add=(id,b,q,pat,g,sb,loose)=>TPLS.push({id,b,q,pat,g,sb:sb||null,loose:!!loose});
-SIMPLE.forEach(([q,e,n,b,sb])=>add("c:"+q,b,`Name ${art(n)} ${n}`,`?item wdt:P31 wd:${q} .`,[[q,e]],sb));
-COUNTRY_CLS.forEach(([q,e,n,b,sb,lo])=>COUNTRIES.forEach(([c,ce,d])=>add(`c:${q}@${c}`,b,`Name ${art(n)} ${n} in ${d}`,`?item wdt:P31 wd:${q} ; wdt:P17 wd:${c} .`,[[q,e],[c,ce]],sb,lo)));
-ORIGIN_CLS.forEach(([q,e,n,b,sb])=>COUNTRIES.forEach(([c,ce,d])=>add(`o:${q}@${c}`,b,`Name ${art(n)} ${n} from ${d}`,`?item wdt:P31 wd:${q} ; wdt:P495 wd:${c} .`,[[q,e],[c,ce]],sb)));
-CONT_CLS.forEach(([q,e,n,b])=>CONTS.forEach(([k,ke])=>add(`k:${q}@${k}`,b,`Name ${art(n)} ${n} in ${ke}`,`{ ?item wdt:P31 wd:${q} ; wdt:P30 wd:${k} . } UNION { ?item wdt:P31 wd:${q} ; wdt:P17/wdt:P30 wd:${k} . }`,[[q,e],[k,ke]])));
-OCC.forEach(([q,e,n,b,sb])=>{add("p:"+q,b,`Name ${art(n)} ${n}`,`?item wdt:P31 wd:Q5 ; wdt:P106 wd:${q} .`,[[q,e],["Q5","human"]],sb,1);
- COUNTRIES.forEach(([c,ce,d])=>add(`p:${q}@${c}`,b,`Name ${art(n)} ${n} from ${d}`,`?item wdt:P31 wd:Q5 ; wdt:P106 wd:${q} ; wdt:P27 wd:${c} .`,[[q,e],["Q5","human"],[c,ce]],sb,1))});
-TEAMS.forEach(([q,e,d,sb])=>add("t:"+q,"Sports & Games","Name a player who has played for "+d,`?item wdt:P54 wd:${q} .`,[[q,e]],sb,1));
-AWARDS.forEach(([q,e,d,b,sb])=>add("a:"+q,b,"Name a winner of the "+d,`?item wdt:P166 wd:${q} .`,[[q,e]],sb,1));
+const art=n=>/^(?!uni|use|usu|eu|one|ubi)[aeiou]/i.test(n)?"an":"a";
+const TPLS=[];const add=(id,b,q,pat,g,sb,loose,pri,o)=>TPLS.push({id,b,q,pat,g,sb:sb||null,loose:!!loose,pri:pri||1,...o});
+const POP=new Set("Q33999 Q177220 Q1028181 Q36180 Q82955 Q2526255 Q36834 Q3665646 Q937857 Q19204627 Q10871364 Q11774891 Q10833314 Q11303721 Q378622 Q11338576 Q12299841".split(" "));
+const CPRI={Q4022:2,Q8502:2,Q23397:2,Q515:2,Q476028:2};
+// "pri" = prior that a template yields familiar answers; candidates are tried in seeded weighted order so likely-easy questions come first
+SIMPLE.forEach(([q,e,n,b,sb])=>add("c:"+q,b,`Name ${art(n)} ${n}`,`?item wdt:P31 wd:${q} .`,[[q,e]],sb,0,4,{noun:n}));
+COUNTRY_CLS.forEach(([q,e,n,b,sb,lo])=>COUNTRIES.forEach(([c,ce,d],i)=>add(`c:${q}@${c}`,b,`Name ${art(n)} ${n} in ${d}`,`?item wdt:P31 wd:${q} ; wdt:P17 wd:${c} .`,[[q,e],[c,ce]],sb,lo,(CPRI[q]||1)*(i<8?.8:.3))));
+ORIGIN_CLS.forEach(([q,e,n,b,sb])=>COUNTRIES.forEach(([c,ce,d],i)=>add(`o:${q}@${c}`,b,`Name ${art(n)} ${n} from ${d}`,`?item wdt:P31 wd:${q} ; wdt:P495 wd:${c} .`,[[q,e],[c,ce]],sb,0,i<8?1:.3)));
+CONT_CLS.forEach(([q,e,n,b])=>CONTS.forEach(([k,ke])=>add(`k:${q}@${k}`,b,`Name ${art(n)} ${n} in ${ke}`,`{ ?item wdt:P31 wd:${q} ; wdt:P30 wd:${k} . } UNION { ?item wdt:P31 wd:${q} ; wdt:P17/wdt:P30 wd:${k} . }`,[[q,e],[k,ke]],0,0,3)));
+OCC.forEach(([q,e,n,b,sb])=>{const pop=POP.has(q);add("p:"+q,b,`Name ${art(n)} ${n}`,`?item wdt:P31 wd:Q5 ; wdt:P106 wd:${q} .`,[[q,e],["Q5","human"]],sb,1,pop?4:1.5);
+ if(pop&&sb)COUNTRIES.slice(0,8).forEach(([c,ce,d])=>add(`p:${q}@${c}`,b,`Name ${art(n)} ${n} from ${d}`,`?item wdt:P31 wd:Q5 ; wdt:P106 wd:${q} ; wdt:P27 wd:${c} .`,[[q,e],["Q5","human"],[c,ce]],sb,1,.5))});
+TEAMS.forEach(([q,e,d,sb])=>add("t:"+q,"Sports & Games","Name a player who has played for "+d,`?item wdt:P54 wd:${q} .`,[[q,e]],sb,1,3));
+AWARDS.forEach(([q,e,d,b,sb])=>add("a:"+q,b,"Name a winner of the "+d,`?item wdt:P166 wd:${q} .`,[[q,e]],sb,1,3));
+// Krillion-style extras: animals (deep taxon queries, binomial names filtered out) and "fruit or vegetable"
+[["Q7377","mammal"],["Q5113","bird"],["Q10811","reptile"],["Q10908","amphibian"],["Q1390","insect"]].forEach(([q,n])=>add("n:"+q,"Nature",`Name ${art(n)} ${n}`,`?item wdt:P31 wd:Q16521 ; wdt:P105 wd:Q7432 ; wdt:P171+ wd:${q} .`,[[q,n],["Q16521","taxon"],["Q7432","species"]],0,0,2,{deep:1,taxon:1,noun:n}));
+add("n:animal","Nature","Name an animal",`?item wdt:P31 wd:Q16521 ; wdt:P105 wd:Q7432 . { ?item wdt:P171+ wd:Q7377 } UNION { ?item wdt:P171+ wd:Q5113 } UNION { ?item wdt:P171+ wd:Q10811 } UNION { ?item wdt:P171+ wd:Q10908 }`,[["Q7377","mammal"],["Q5113","bird"],["Q10811","reptile"],["Q10908","amphibian"],["Q16521","taxon"],["Q7432","species"]],0,0,3,{deep:1,taxon:1,noun:"animal"});
+add("c:fv","Food & Drink","Name a fruit or vegetable",`{ ?item wdt:P31 wd:Q3314483 } UNION { ?item wdt:P31 wd:Q11004 } .`,[["Q3314483","fruit"],["Q11004","vegetable"]],0,0,4,{noun:"fruit or vegetable"});
+// map everything onto the real game's categories, add "(like X)" hints and "(past or present)" notes
+const MUSIC=new Set("Q177220 Q36834 Q34379 Q7366 Q215380 Q482994".split(" ")),FILMC=new Set("Q11424 Q5398426 Q33999 Q2526255 Q245068 Q7889 Q1569167 Q3966183 Q103916 Q103618".split(" ")),BRANDC=new Set("Q6368 Q9135 Q8076 Q431289 Q786803 Q46970".split(" ")),NATC=new Set(["Q39367"]);
+const EXC=new Set("Q746549 Q134768 Q10943 Q34379 Q9143 Q47574 Q39367 Q431289 Q28640 Q42527".split(" ")),cls=t=>t.id.split(/[:@|#]/)[1];
+TPLS.forEach(t=>{const c=cls(t);t.b=MUSIC.has(c)?"Music":FILMC.has(c)?"Film & TV":BRANDC.has(c)?"Brands":NATC.has(c)?"Nature":t.b=="Geography"?"Geography":t.b=="Food & Drink"?"Food & drink":t.b=="Sports & Games"?"Sports":t.b=="Nature"?"Nature":"General knowledge";
+ if(EXC.has(c)&&/^c:Q\d+$/.test(t.id))t.ex=1;if((/^p:/.test(t.id)&&t.sb)||/^t:/.test(t.id))t.q+=" (past or present)"});
+// Krillion-style constraint variants (starts with a letter / vowel, ends in, one-word, 7+ letters, five-letter) built from a base pool
+const VAR=new Set("Q515 Q3624078 Q746549 Q10943 Q134768 Q3314483 Q11004 Q40050 Q42527 Q39367 Q11424 Q5398426 Q7366 Q215380 Q431289 Q786803 Q46970 Q28640 Q47574 Q7889 Q1569167 Q3966183 Q9143 Q34379 Q34770 Q4022 Q8502 Q23397 Q23442".split(" "));
+TPLS.filter(t=>(/^c:Q\d+$/.test(t.id)&&VAR.has(cls(t)))||t.id=="c:fv"||t.id=="n:animal").forEach(t=>TPLS.push({...t,id:t.id+"|v",base:t,variant:1,pri:t.id=="n:animal"?6:5,ex:0}));
+let CURS=null;
 // ===== network (rate-limited, with timeout) =====
 let active=0;const waiters=[];
 const lock=async()=>{if(active>=CFG.PARALLEL)await new Promise(r=>waiters.push(r));active++};const unlock=()=>{active--;const w=waiters.shift();w&&w()};
-async function getJSON(url){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),CFG.TIMEOUT);try{const r=await fetch(url,{signal:ac.signal});if(!r.ok)throw new Error("HTTP "+r.status);return await r.json()}finally{clearTimeout(to)}}
-async function sparql(q){await lock();try{return(await getJSON(CFG.ENDPOINT+"?format=json&query="+encodeURIComponent(q))).results.bindings}finally{unlock()}}
+async function getJSON(url,ms){const ac=new AbortController(),to=setTimeout(()=>ac.abort(),ms||CFG.TIMEOUT);try{const r=await fetch(url,{signal:ac.signal});if(!r.ok)throw new Error("HTTP "+r.status);return await r.json()}finally{clearTimeout(to)}}
+async function sparql(q,ms){await lock();try{return(await getJSON(CFG.ENDPOINT+"?format=json&query="+encodeURIComponent(q),ms)).results.bindings}finally{unlock()}}
 const poolQuery=(pat,limit)=>`SELECT ?item ?itemLabel ?sl (GROUP_CONCAT(DISTINCT ?alt;separator="|") AS ?alts) WHERE {
  { SELECT ?item ?sl WHERE { ${pat} ?item wikibase:sitelinks ?sl . FILTER(?sl>=${CFG.MIN_SL}) } ORDER BY DESC(?sl) LIMIT ${limit} }
  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
@@ -171,37 +187,53 @@ const DESC=new Set("river mountain mountains lake city county state island islan
 function mkItem(w,alts){const al=[w,...alts],tk=tokq(w),core=tk.filter(x=>!DESC.has(x));if(core.length&&core.length<tk.length&&core.join("").length>=4)al.push(core.join(" "));
  const t=al.map(x=>tokq(x).map(stm)),n=[...new Set(t.map(x=>x.join("")).filter(Boolean))];n.forEach(k=>GK.add(k));return{w,n,t,cl:false,f:strip(w)[0]||""}}
 function tiersFor(n){const N=Math.max(n,CFG.MIN_POOL);return Array.from({length:n},(_,i)=>{const s=Math.log(i+1)/Math.log(N);return s<=.35?0:s<=.55?2:s<=.75?3:s<=.9?4:5})}
-function cleanPool(rows){const seen=new Set(),items=[];let dup=0;rows.forEach(r=>{const w=r.itemLabel.value;if(/^[QP]\d+$/.test(w)||w.length<2||w.length>70||/^list of/i.test(w))return;const k=keyOf(w);if(!k)return;if(seen.has(k)){dup++;return}seen.add(k);
+function cleanPool(rows,t){const seen=new Set(),items=[];let dup=0;rows.forEach(r=>{const w=r.itemLabel.value;if(/^[QP]\d+$/.test(w)||w.length<2||w.length>70||/^list of/i.test(w)||(t&&t.taxon&&/^[A-Z][a-z]+ [a-z]+$/.test(w)))return;const k=keyOf(w);if(!k)return;if(seen.has(k)){dup++;return}seen.add(k);
   items.push([w,+r.sl.value,r.alts?r.alts.value.split("|").filter(a=>a.length>1&&a.length<=40).slice(0,6):[]])});return{items,dup,raw:rows.length}}
 function gate(cp){const n=cp.items.length;if(n<CFG.MIN_POOL)return`pool of ${n} (needs ${CFG.MIN_POOL}+)`;const kn=cp.items.filter(x=>x[1]>=CFG.KNOWN_SL).length;if(kn<CFG.MIN_KNOWN)return`only ${kn} well-known answers`;if(cp.dup/Math.max(1,cp.raw)>.15)return"ambiguous labels";return""}
 const cacheGet=id=>{const o=store.get("pool:"+id,null);return o&&Date.now()-o.t<CFG.CACHE_DAYS*864e5?o:null};
 function cachePut(id,o){const idx=store.get("poolidx",[]).filter(x=>x!=id);idx.push(id);while(idx.length>30){try{localStorage.removeItem("pool:"+idx.shift())}catch(e){}}store.set("poolidx",idx);store.set("pool:"+id,o)}
 const isBad=id=>{const b=store.get("bad",{})[id];return b&&Date.now()-b.t<CFG.CACHE_DAYS*864e5};
 const markBad=(id,why)=>{const b=store.get("bad",{});b[id]={t:Date.now(),why};store.set("bad",b)};
-function toPool(t,o){const items=o.items.map(([w,sl,al])=>mkItem(w,al));return{b:t.b,sb:t.sb,q:t.q,id:t.id,pat:t.pat,loose:t.loose,capped:!!o.capped,raw:o.items,items,sl:o.items.map(x=>x[1]),tr:tiersFor(items.length)}}
-async function loadPool(t,daily){let o=cacheGet(t.id);if(!o){const rows=await sparql(poolQuery(t.pat,CFG.LIMIT)),cp=cleanPool(rows),why=gate(cp);if(why){markBad(t.id,why);console.info("rejected",t.q,"-",why);return null}
+function toPool(t,o){const items=o.items.map(([w,sl,al])=>mkItem(w,al));return{b:t.b,sb:t.sb,q:t.q,id:t.id,pat:t.pat,loose:t.loose,ex:t.ex,capped:!!o.capped,raw:o.items,items,sl:o.items.map(x=>x[1]),tr:tiersFor(items.length)}}
+async function loadPool(t,daily){let o=cacheGet(t.id);if(!o){let rows;try{rows=await sparql(poolQuery(t.pat,CFG.LIMIT),t.deep?14000:0)}catch(e){if(t.deep)markBad(t.id,"slow query");throw e}const cp=cleanPool(rows,t),why=gate(cp);if(why){markBad(t.id,why);console.info("rejected",t.q,"-",why);return null}
   o={t:Date.now(),items:cp.items,capped:rows.length>=CFG.LIMIT};cachePut(t.id,o)}return toPool(t,o)}
+const VOW="aeiou";
+function variantOpts(pool){const lab=pool.items.map(it=>strip(it.w)),cnt={},ec={},o=[];lab.forEach(l=>{if(!l)return;cnt[l[0]]=(cnt[l[0]]||0)+1;const e=l[l.length-1];ec[e]=(ec[e]||0)+1});
+ Object.keys(cnt).filter(L=>/[a-z]/.test(L)&&cnt[L]>=CFG.MIN_POOL).forEach(L=>o.push({k:"s",l:L,w:5}));o.push({k:"v",w:2});
+ Object.keys(ec).filter(L=>/[a-z]/.test(L)&&ec[L]>=CFG.MIN_POOL).forEach(L=>o.push({k:"e",l:L,w:1}));o.push({k:"w",w:1},{k:"w7",w:.6},{k:"l5",w:.5});return o}
+const vfn={s:l=>x=>strip(x)[0]==l,v:()=>x=>VOW.includes(strip(x)[0]),e:l=>x=>{const z=strip(x);return z[z.length-1]==l},w:()=>x=>!strip(x).includes(" "),w7:()=>x=>{const z=strip(x);return z.length>=7&&!z.includes(" ")},l5:()=>x=>{const z=strip(x);return z.length==5}};
+const mkFilt=v=>vfn[v.k](v.l);
+const vtext=(v,n,place)=>{const a=art(n),L=(v.l||"").toUpperCase();return v.k=="s"?`Name ${a} ${n} ${place?"whose name":"that"} starts with ${L}`:v.k=="v"?`Name ${a} ${n} that starts with a vowel`:v.k=="e"?`Name ${a} ${n} that ends in ${L}`:v.k=="w"?`Name a one-word ${n}`:v.k=="w7"?`Name a one-word ${n} whose name is 7 or more letters`:`Name ${a} ${n} with a five-letter name`};
+function applyVariant(base,v,t){const f=mkFilt(v),keep=base.items.map((it,i)=>f(it.w)?i:-1).filter(i=>i>=0),items=keep.map(i=>base.items[i]);
+ return{...base,id:t.id+"#"+v.k+(v.l||""),q:vtext(v,t.noun,t.b=="Geography"),v,filt:f,ex:0,raw:keep.map(i=>base.raw[i]),items,sl:keep.map(i=>base.sl[i]),tr:tiersFor(items.length)}}
+async function loadVariant(t,daily){const base=await loadPool(t.base,daily);if(!base)return null;const rr=CURS?rng(CURS+"|"+t.id):Math.random,d=dif(daily),ok=[];
+ variantOpts(base).forEach(v=>{const p=applyVariant(base,v,t);if(p.items.length>=CFG.MIN_POOL&&famOK(p,d))ok.push(v)});if(!ok.length)return null;
+ ok.sort((a,b)=>(a.k+(a.l||"")).localeCompare(b.k+(b.l||"")));const tot=ok.reduce((n,v)=>n+v.w,0);let x=rr()*tot,pick=ok[0];for(const v of ok){x-=v.w;if(x<=0){pick=v;break}}return applyVariant(base,pick,t)}
 const hintOf=c=>"Pool of "+c.items.length+(c.capped?"+":"")+" answers · any valid answer counts";
-const mkPrompt=(c,sports)=>({c,b:sports?(c.sb||c.b):c.b,id:c.id,text:c.q,hint:hintOf(c),sports:sports?1:0,l:null});
+const mkPrompt=(c,sports)=>({c,b:sports?(c.sb||c.b):c.b,id:c.id,text:c.q+(c.ex&&c.items.length?" (like "+c.items[0].w+")":""),hint:hintOf(c),sports:sports?1:0,l:null});
+const DIF=[{n:"Easy",top:100,kn:25,sl:40},{n:"Normal",top:60,kn:15,sl:25},{n:"Hard",top:0,kn:10,sl:12}];
+const dif=daily=>DIF[daily?0:store.get("dif",0)];
+const famOK=(c,d)=>(c.sl[0]||0)>=d.top&&c.sl.filter(x=>x>=d.sl).length>=d.kn;
+const wshuf=(a,r)=>a.map(t=>[Math.pow(r(),1/(t.pri||1)),t]).sort((x,y)=>y[0]-x[0]).map(x=>x[1]);
 // ===== selection: deterministic order per seed, first N that pass the rules =====
 let lastErr=null;
 async function collect(queue,need,accept,daily,prog){const out=[];let i=0,tries=0;
  while(out.length<need&&i<queue.length&&tries<CFG.ATTEMPTS){const batch=[];while(batch.length<Math.min(CFG.PARALLEL,need-out.length+1)&&i<queue.length){const t=queue[i++];if(daily||!isBad(t.id))batch.push(t)}
-  tries+=batch.length;const res=await Promise.all(batch.map(t=>loadPool(t,daily).catch(e=>{lastErr=e;return null})));
-  for(let k=0;k<batch.length&&out.length<need;k++){const p=res[k];if(p&&accept(batch[k],out)){out.push(p);prog&&prog(out.length,need)}}}
+  tries+=batch.length;const res=await Promise.all(batch.map(t=>(t.variant?loadVariant(t,daily):loadPool(t,daily)).catch(e=>{lastErr=e;return null})));
+  for(let k=0;k<batch.length&&out.length<need;k++){const p=res[k];if(p&&famOK(p,dif(daily))&&accept(batch[k],out)){out.push(p);prog&&prog(out.length,need)}}}
  return out}
 async function prepare({seed,broad,sports,prog}){const dayI=seed&&/^krill\d+$/.test(seed)?+seed.slice(5):null,day=dayI!==null?new Date(DAY0+dayI*864e5).toISOString().slice(0,10):null;
  if(day&&!broad){const pk=await loadPack(day);if(pk)return pk}
- const ok=await checkSeeds(),daily=!!seed,r=seed?rng(seed):Math.random,use=TPLS.filter(t=>t.g.every(([q])=>ok.has(q)));let out;lastErr=null;
- if(sports){out=(await collect(shuf(use.filter(t=>t.sb),r),10,(t,o)=>o.filter(p=>p.sb==t.sb).length<2,daily,prog)).map(c=>mkPrompt(c,1))}
- else if(broad){out=(await collect(shuf(use.filter(t=>t.b==broad),r),7,()=>true,daily,prog)).map(c=>mkPrompt(c,0))}
- else{const qs=shuf(BR,r).map(b=>shuf(use.filter(t=>t.b==b),r));let done=0;const rest=shuf(use,r);
+ CURS=seed||null;const ok=await checkSeeds(),daily=!!seed,r=seed?rng(seed):Math.random,use=TPLS.filter(t=>t.g.every(([q])=>ok.has(q)));let out;lastErr=null;
+ if(sports){out=(await collect(wshuf(use.filter(t=>t.sb),r),10,(t,o)=>o.filter(p=>p.sb==t.sb).length<2,daily,prog)).map(c=>mkPrompt(c,1))}
+ else if(broad){out=(await collect(wshuf(use.filter(t=>t.b==broad),r),7,()=>true,daily,prog)).map(c=>mkPrompt(c,0))}
+ else{const qs=shuf(BR,r).slice(0,7).map(b=>wshuf(use.filter(t=>t.b==b),r));let done=0;const rest=wshuf(use,r);
   const per=await Promise.all(qs.map(q=>collect(q,1,()=>true,daily).then(x=>{prog&&prog(++done,7);return x[0]})));
   out=per.filter(Boolean);if(out.length<7){const have=new Set(out.map(c=>c.id));out=out.concat(await collect(rest.filter(t=>!have.has(t.id)),7-out.length,()=>true,daily,prog))}out=out.map(c=>mkPrompt(c,0))}
  const need=sports?10:7;if(out.length<need)throw lastErr||new Error("Couldn't find enough questions that pass the "+CFG.MIN_POOL+"+ answer rule");return out}
 // optional: pre-generated daily pack hosted anywhere static (same questions for everyone)
-async function loadPack(day){if(!CFG.PACK_URL)return null;try{const j=await getJSON(CFG.PACK_URL.replace(/\/$/,"")+"/"+day+".json");return j.prompts.map(o=>mkPrompt(toPool({id:o.id,b:o.b,sb:o.sb,q:o.q,pat:o.pat,loose:o.loose},{items:o.items,capped:o.capped}),0))}catch(e){return null}}
-const packOf=(day,ps)=>JSON.stringify({day,prompts:ps.map(p=>({id:p.c.id,b:p.c.b,sb:p.c.sb,q:p.c.q,pat:p.c.pat,loose:p.c.loose,capped:p.c.capped,items:p.c.raw}))});
+async function loadPack(day){if(!CFG.PACK_URL)return null;try{const j=await getJSON(CFG.PACK_URL.replace(/\/$/,"")+"/"+day+".json");return j.prompts.map(o=>{const c=toPool({id:o.id,b:o.b,sb:o.sb,q:o.q,pat:o.pat,loose:o.loose},{items:o.items,capped:o.capped});if(o.v){c.v=o.v;c.filt=mkFilt(o.v)}return mkPrompt(c,0)})}catch(e){return null}}
+const packOf=(day,ps)=>JSON.stringify({day,prompts:ps.map(p=>({id:p.c.id,b:p.c.b,sb:p.c.sb,q:p.c.q,pat:p.c.pat,loose:p.c.loose,capped:p.c.capped,items:p.c.raw,v:p.c.v||null}))});
 // ===== answer judging: local pool first, then live Wikidata check for anything valid but not listed =====
 const tix=(c,i)=>c.tr[i];
 const eligible=p=>p.c.items.map((it,i)=>({it,i}));
@@ -210,15 +242,17 @@ function judge(p,raw){const q=tokq(raw).map(stm),a=q.join("");if(!a)return null;
  if(!h&&L){h=pool.find(o=>o.it.t.some(A=>A.length<q.length&&A.join("").length>=4&&(A.every((x,k)=>x==q[k])||A.every((x,k)=>x==q[q.length-A.length+k]))))
   ||pool.find(o=>o.it.t.some(A=>A.length>1&&A[A.length-1].length>=4&&a==A[A.length-1]))
   ||pool.find(o=>o.it.t.some(A=>A.length>2&&A.slice(-2).join("")==a))}
- if(!h&&!GK.has(a)){let best=1e9;const C=[a];if(L)for(let k=1;k<q.length;k++)C.push(q.slice(-k).join(""));
-  pool.forEach(o=>{const K=o.it.n.concat(L?o.it.t.filter(A=>A.length>1&&A[A.length-1].length>=5).map(A=>A[A.length-1]):[]);
-   K.forEach(x=>C.forEach(c=>{const m=tol(Math.max(x.length,c.length));if(x.replace(/\D/g,"")!=c.replace(/\D/g,""))return;let d=dl(x,c);if(d>m&&x.length>=5&&(ph(x)==ph(c)||(sk(x).length>=3&&sk(x)==sk(c))))d=1;if(d<=m&&d<best){best=d;h=o;fz=true}}))})}
- return h&&{word:h.it.w,idx:tix(p.c,h.i),fix:fz}}
+ return h&&{word:h.it.w,idx:tix(p.c,h.i),fix:false}}
+// Strict autocorrect: <=1 typo (2 only for 12+ letters), same first letter, never a tie, never a real thing in its own right.
+function fuzzyJudge(p,raw){if(!store.get("fz",1))return null;const q=tokq(raw).map(stm),a=q.join("");if(a.length<5||GK.has(a))return null;const L=p.c.loose,C=[a];if(L)for(let k=1;k<q.length;k++)C.push(q.slice(-k).join(""));
+ let best=9,hit=[];eligible(p).forEach(o=>{const K=o.it.n.concat(L?o.it.t.filter(A=>A.length>1).map(A=>A[A.length-1]):[]);K.forEach(x=>{if(x.length<6)return;C.forEach(c=>{if(c.length<5||c[0]!=x[0]||Math.abs(c.length-x.length)>1||x.replace(/\D/g,"")!=c.replace(/\D/g,""))return;const d=dl(x,c);if(d<1||d>(x.length>=12?2:1))return;if(d<best){best=d;hit=[o]}else if(d==best&&!hit.includes(o))hit.push(o)})})});
+ return hit.length==1?{word:hit[0].it.w,idx:tix(p.c,hit[0].i),fix:true}:null}
+async function isRealThing(raw){const a=keyOf(raw);try{return((await getJSON(CFG.API+"?action=wbsearchentities&format=json&origin=*&language=en&uselang=en&type=item&limit=7&search="+encodeURIComponent(raw))).search||[]).some(x=>[x.label,x.match&&x.match.text].filter(Boolean).map(keyOf).includes(a))}catch(e){return false}}
 async function liveJudge(p,raw){const c=p.c,a=keyOf(raw);if(a.length<3||!c.pat)return null;let cands;
  try{cands=(await getJSON(CFG.API+"?action=wbsearchentities&format=json&origin=*&language=en&uselang=en&type=item&limit=10&search="+encodeURIComponent(raw))).search||[]}catch(e){return null}
- const near=cands.filter(x=>[x.label,x.match&&x.match.text].filter(Boolean).map(keyOf).some(k=>k==a||(a.length>=6&&dl(k,a)<=1)));if(!near.length)return null;
+ const near=cands.filter(x=>[x.label,x.match&&x.match.text].filter(Boolean).map(keyOf).includes(a));if(!near.length)return null;
  let rows;try{rows=await sparql(`SELECT ?item ?sl WHERE { VALUES ?item { ${near.map(x=>"wd:"+x.id).join(" ")} } ${c.pat} ?item wikibase:sitelinks ?sl . }`)}catch(e){return null}
- if(!rows.length)return null;const best=rows.map(r=>({id:r.item.value.split("/").pop(),sl:+r.sl.value})).sort((x,y)=>y.sl-x.sl)[0],cand=near.find(x=>x.id==best.id);if(!cand)return null;
+ if(!rows.length)return null;const best=rows.map(r=>({id:r.item.value.split("/").pop(),sl:+r.sl.value})).sort((x,y)=>y.sl-x.sl)[0],cand=near.find(x=>x.id==best.id);if(!cand||(c.filt&&!c.filt(cand.label)))return null;
  const rank=c.sl.filter(s=>s>best.sl).length,N=Math.max(c.items.length,CFG.MIN_POOL,rank+1),s=Math.log(rank+1)/Math.log(N),idx=s<=.35?0:s<=.55?2:s<=.75?3:s<=.9?4:5;
  c.items.push(mkItem(cand.label,[]));c.sl.push(best.sl);c.tr.push(idx);return{word:cand.label,idx,fix:false,live:true}}
 function samples(p){const pool=eligible(p).map(o=>[o.it.w,tix(p.c,o.i)]),tiers=p.sports?ST:T;return tiers.map((t,k)=>{const m=pool.filter(o=>o[1]==k);return m.length?t[0]+": "+m[Math.floor(Math.random()*m.length)][0]:null}).filter(Boolean).join("  ·  ")}
@@ -302,7 +336,7 @@ function ask(){const p=S.ps[S.i];busy=0;hud();$("pq").classList.remove("hidden")
   $("pn").textContent="PROMPT "+(S.i+1)+" / "+(S.sports?10:7)+" · "+p.b.toUpperCase();$("prompt").textContent=p.text;if(p.hint){const h=document.createElement("div");h.className="sm";h.style.cssText="margin-top:8px;font-size:18px";h.textContent=p.hint;$("prompt").append(h)}$("sub").textContent=S.sports?"Score":"Sink";$("pass").textContent=S.sports?"Pass (0 pts)":"Pass (0 pts)";$("ans").value="";$("ans").focus();t0=Date.now();clearInterval(timer);
   timer=setInterval(()=>{const r=Math.max(0,25-(Date.now()-t0)/1000);$("fill").style.width=r*4+"%";$("tm").textContent=Math.ceil(r)+"s";if(r<=0)settle(null,"",1)},100)}
 async function tryAnswer(){if(busy)return;const raw=$("ans").value.trim();if(!raw)return;const p=S.ps[S.i];let j=judge(p,raw);
-  if(!j){busy=1;$("msg").textContent="Checking “"+raw+"” on Wikidata…";const t1=Date.now();try{j=await liveJudge(p,raw)}catch(e){j=null}t0+=Date.now()-t1;busy=0;if(S.ps[S.i]!==p)return}
+  if(!j){busy=1;$("msg").textContent="Checking “"+raw+"”…";const t1=Date.now();try{j=await liveJudge(p,raw);if(!j){const f=fuzzyJudge(p,raw);if(f&&!(await isRealThing(raw)))j=f}}catch(e){j=null}t0+=Date.now()-t1;busy=0;if(S.ps[S.i]!==p)return}
   if(!j){$("msg").textContent="“"+raw+"” isn't a valid answer. Try again.";$("ans").value="";$("ans").focus();beep(110,.2);const e=$("pq");e.classList.remove("shake");void e.offsetWidth;e.classList.add("shake");return}
   $("msg").textContent="";settle(j,raw,0)}
 function settle(j,raw,to,pass){if(busy)return;busy=1;clearInterval(timer);const p=S.ps[S.i],t=j?(S.sports?ST[j.idx]:T[j.idx]):null,pts=t?t[1]:0;S.pts+=pts;
@@ -336,18 +370,19 @@ function end(pts,log,label,again){S=S||{};S.pts=pts;S.log=log;S.label=label;dep=
 function finish(){const st=store.get("stats",{n:0,best:0});st.n++;st.best=Math.max(st.best,S.pts);store.set("stats",st);
   if(S.key){const Rs=store.get("res",{});Rs[S.key]={pts:S.pts,log:S.log};store.set("res",Rs)}end(S.pts,S.log,S.label,!S.key)}
 // menu + home
+const setUI=()=>{$("m-dv").textContent=DIF[store.get("dif",0)].n.toUpperCase();$("m-fv").textContent=store.get("fz",1)?"STRICT":"OFF"};
 function menu(){const Rs=store.get("res",{}),d=dayN(),mk2=(p,l,r,f)=>{const b=document.createElement("button");b.className="btn";b.innerHTML="<span></span><span class='sm'></span>";b.firstChild.textContent=l;b.lastChild.textContent=r;b.onclick=f;p.append(b)};
   const daily=k=>Rs["d"+k]?end(Rs["d"+k].pts,Rs["d"+k].log,"Dive #"+(k+1),false):start("d"+k,"Dive #"+(k+1),0,"krill"+k);
   $("m-ds").textContent=Rs["d"+d]?Rs["d"+d].pts*10+"m ✓":"#"+(d+1);$("m-d").onclick=()=>daily(d);$("m-u").onclick=()=>start(null,"Unlimited dive");$("m-sports").onclick=()=>start(null,"EBK Required—Sports",0,null,"sports");
   $("m-p").innerHTML="";BR.forEach(k=>mk2($("m-p"),k,"pack",()=>start(null,k+" pack",0,null,k)));
   $("m-a").innerHTML="";for(let k=d-1;k>=Math.max(0,d-30);k--)mk2($("m-a"),"#"+(k+1)+" · "+new Date(DAY0+k*864e5).toISOString().slice(5,10),Rs["d"+k]?Rs["d"+k].pts*10+"m ✓":"play",()=>daily(k));
-  if(d==0)$("m-a").innerHTML="<span class='sm'>No past dives yet.</span>";sndUI()}
+  if(d==0)$("m-a").innerHTML="<span class='sm'>No past dives yet.</span>";sndUI();setUI()}
 function home(){clearInterval(timer);document.body.classList.remove("sports-mode");document.title="frillion";menu();const Rs=store.get("res",{}),d=dayN(),st=store.get("stats",{n:0,best:0});dep=0;shown=0;
   $("stats").textContent="Dives: "+st.n+" · Deepest: "+fmt(st.best*10)+"m";$("go").onclick=()=>$("m-d").click();
   if(Rs["d"+d])end(Rs["d"+d].pts,Rs["d"+d].log,"Dive #"+(d+1),false);else{$("menu").classList.add("hidden");view("intro")}}
 $("burger").onclick=()=>{menu();$("menu").classList.remove("hidden")};$("mx").onclick=()=>$("menu").classList.add("hidden");
 $("snd").onclick=$("m-snd").onclick=()=>{snd=!snd;store.set("snd",snd);sndUI();beep(440)};
-$("gx").onclick=()=>{genUI(false);home()};$("m-exp").onclick=exportPack;$("m-rs").onclick=()=>{if(confirm("Erase all dives and stats on this device?")){try{localStorage.clear()}catch(e){}location.reload()}};
+$("gx").onclick=()=>{genUI(false);home()};$("m-exp").onclick=exportPack;$("m-dif").onclick=()=>{store.set("dif",(store.get("dif",0)+1)%3);setUI()};$("m-fz").onclick=()=>{store.set("fz",store.get("fz",1)?0:1);setUI()};$("m-rs").onclick=()=>{if(confirm("Erase all dives and stats on this device?")){try{localStorage.clear()}catch(e){}location.reload()}};
 $("sub").onclick=tryAnswer;$("ans").onkeydown=e=>{if(e.key=="Enter")tryAnswer()};$("pass").onclick=()=>settle(null,"",0,1);
 $("next").onclick=()=>S.i==(S.sports?9:6)?finish():(S.i++,ask());
 $("again").onclick=()=>start(null,S.label,0,null,S.broad);$("home").onclick=()=>{menu();$("menu").classList.remove("hidden")};

@@ -94,7 +94,7 @@ body.sports-mode .tbar i{background:#42e6a4}
  <h3>THEMED PACKS</h3><div id="m-p" style="display:flex;flex-direction:column;gap:10px"></div>
  <h3>ARCHIVE</h3><div id="m-a" style="display:flex;flex-direction:column;gap:10px"></div>
  <h3>SETTINGS</h3><button class="btn" id="m-snd"><span>Sound</span><span id="m-sv"></span></button><button class="btn" id="m-dif"><span>Question difficulty (not daily)</span><span id="m-dv"></span></button><button class="btn" id="m-fz"><span>Spelling correction</span><span id="m-fv"></span></button><button class="btn" id="m-exp"><span>Export today's daily pack (JSON)</span><span>⇩</span></button><button class="btn" id="m-rs"><span>Reset all progress</span><span>⚠</span></button>
- <h3>FAQ</h3><p class="sm" style="margin:0">Questions are generated live from Wikidata, so there is no fixed list. A question only runs if it has 50+ valid answers and enough well-known ones to be fair. Rarity comes from how widely known each answer is (Wikipedia language editions). Answers not in the listed pool are checked live. Questions default to Easy (the best answer must be widely known and 25+ answers well-known); the daily dive is always Easy. Spelling correction is strict: one typo, a single unambiguous match, and never when what you typed is a real thing itself. Wrong answers can be retried until the timer runs out. The daily dive uses a date seed; for identical questions for everyone, host a pre-built pack (see CFG.PACK_URL).</p>
+ <h3>FAQ</h3><p class="sm" style="margin:0">Questions are generated from Wikidata data packs that rebuild automatically, so there is no fixed list. A question only runs if it has 50+ valid answers and enough well-known ones to be fair. Rarity comes from how widely known each answer is (Wikipedia language editions). Answers not in the listed pool are checked live. Questions default to Easy (the best answer must be widely known and 25+ answers well-known); the daily dive is always Easy. Spelling correction is strict: one typo, a single unambiguous match, and never when what you typed is a real thing itself. Wrong answers can be retried until the timer runs out. The daily dive uses a date seed; for identical questions for everyone, host a pre-built pack (see CFG.PACK_URL).</p>
 </div></div>
 <script>
 const T=[["Plankton",10,"t0","⬜","Everyone's first thought. Barely a ripple."],["Too Clever",15,"t1","🟪","Too clever - everyone zigs the same way."],["Schooler",30,"t2","🟦","Solid - swims with the school."],["Rare",60,"t3","🟩","Rare find - few swim this deep."],["Deep Cut",85,"t4","🟧","Deep cut - it's dark down here."],["One in a Trench",100,"t5","🟥","Trench floor. Nobody comes down here."]];
@@ -127,7 +127,7 @@ const BR=["Geography","Food & drink","Sports","Music","Film & TV","Brands","Natu
 //   R1  answer pool >= MIN_POOL distinct answers      R2  >= MIN_KNOWN well-known answers (so it is answerable)
 //   R3  no unresolved/ambiguous labels (<15% dupes)    R4  every seed entity's live label must match what we expect
 // Anything failing a rule is dropped and the next candidate is tried. Valid answers outside the cached pool are verified live.
-const CFG={ENDPOINT:"https://query.wikidata.org/sparql",API:"https://www.wikidata.org/w/api.php",MIN_POOL:50,LIMIT:1500,MIN_SL:3,MIN_KNOWN:10,KNOWN_SL:12,TIMEOUT:25000,PARALLEL:3,BACKOFF:2000,BUDGET:100000,ATTEMPTS:60,CACHE_DAYS:14,PACK_URL:""};
+const CFG={ENDPOINT:"https://query.wikidata.org/sparql",API:"https://www.wikidata.org/w/api.php",MIN_POOL:50,LIMIT:1500,MIN_SL:3,MIN_KNOWN:10,KNOWN_SL:12,TIMEOUT:25000,PARALLEL:3,BACKOFF:2000,PACK_BASE:"packs",LIVE_CHECK:true,LIVE_GAP:900,BUDGET:100000,ATTEMPTS:60,CACHE_DAYS:14,PACK_URL:""};
 const COUNTRIES=[["Q30","United States","the United States"],["Q145","United Kingdom","the United Kingdom"],["Q142","France","France"],["Q183","Germany","Germany"],["Q38","Italy","Italy"],["Q29","Spain","Spain"],["Q17","Japan","Japan"],["Q148","China","China"],["Q668","India","India"],["Q16","Canada","Canada"],["Q408","Australia","Australia"],["Q155","Brazil","Brazil"],["Q159","Russia","Russia"],["Q96","Mexico","Mexico"],["Q414","Argentina","Argentina"],["Q55","Netherlands","the Netherlands"],["Q34","Sweden","Sweden"],["Q36","Poland","Poland"]];
 const CONTS=[["Q46","Europe"],["Q48","Asia"],["Q15","Africa"],["Q49","North America"],["Q18","South America"],["Q55643","Oceania"]];
 // [qid, expected English label, phrase, broad category, sports-mode label]
@@ -162,7 +162,7 @@ TPLS.forEach(t=>{const c=cls(t);t.b=MUSIC.has(c)?"Music":FILMC.has(c)?"Film & TV
  if(EXC.has(c)&&/^c:Q\d+$/.test(t.id))t.ex=1;if((/^p:/.test(t.id)&&t.sb)||/^t:/.test(t.id))t.q+=" (past or present)"});
 // Krillion-style constraint variants (starts with a letter / vowel, ends in, one-word, 7+ letters, five-letter) built from a base pool
 const VAR=new Set("Q515 Q3624078 Q746549 Q10943 Q134768 Q3314483 Q11004 Q40050 Q42527 Q39367 Q11424 Q5398426 Q7366 Q215380 Q431289 Q786803 Q46970 Q28640 Q47574 Q7889 Q1569167 Q3966183 Q9143 Q34379 Q34770 Q4022 Q8502 Q23397 Q23442".split(" "));
-TPLS.filter(t=>(/^c:Q\d+$/.test(t.id)&&VAR.has(cls(t)))||t.id=="c:fv"||t.id=="n:animal").forEach(t=>TPLS.push({...t,id:t.id+"|v",base:t,variant:1,pri:t.id=="n:animal"?6:5,ex:0}));
+TPLS.filter(t=>(/^c:Q\d+$/.test(t.id)&&VAR.has(cls(t)))||t.id=="c:fv"||t.id=="n:animal").forEach(t=>TPLS.push({...t,id:t.id+"|v",base:t,variant:1,pri:t.id=="n:animal"?2.5:1.5,ex:0}));
 const BIG=new Set("Q11424 Q5398426 Q7366 Q482994 Q431289 Q515 Q7889 Q3966183 Q1569167 Q28640 Q786803 Q46970 Q215380".split(" "));
 TPLS.forEach(t=>{if(/^p:/.test(t.id)){t.minSl=10;t.limit=1000}else if(BIG.has(cls(t))||t.deep){t.minSl=8;t.limit=1200}});
 let CURS=null,DL=0;
@@ -177,8 +177,11 @@ const poolQuery=(pat,limit,minSl)=>`SELECT ?item ?itemLabel ?sl (GROUP_CONCAT(DI
  SERVICE wikibase:label { bd:serviceParam wikibase:language "en" . }
  OPTIONAL { ?item skos:altLabel ?alt . FILTER(LANG(?alt)="en") }
 } GROUP BY ?item ?itemLabel ?sl ORDER BY DESC(?sl)`;
+// ===== static packs (built offline by build-packs.mjs): the game reads these instead of querying Wikidata =====
+let PK=null,PKTRIED=false;const PKC=new Map();
+async function loadIndex(){if(PKTRIED)return PK;PKTRIED=true;if(!CFG.PACK_BASE)return null;try{const r=await fetch(CFG.PACK_BASE+"/index.json",{cache:"no-cache"});if(!r.ok)throw 0;const j=await r.json();if(j.v===1&&j.pools&&Object.keys(j.pools).length>20)PK=j}catch(e){}return PK}
 // R4: verify every seed entity is what we think it is (guards against wrong IDs), cached 30 days
-async function checkSeeds(){const c=store.get("seedok",null);if(c&&Date.now()-c.t<30*864e5)return new Set(c.ok);
+async function checkSeeds(){const pk=await loadIndex();if(pk)return new Set(pk.seedok);const c=store.get("seedok",null);if(c&&Date.now()-c.t<30*864e5)return new Set(c.ok);
  const g=new Map();TPLS.forEach(t=>t.g.forEach(([q,e])=>g.set(q,e)));const ids=[...g.keys()],lab={};
  for(let i=0;i<ids.length;i+=60){const rows=await sparql(`SELECT ?q ?l WHERE { VALUES ?q { ${ids.slice(i,i+60).map(x=>"wd:"+x).join(" ")} } ?q rdfs:label ?l . FILTER(LANG(?l)="en") }`);rows.forEach(r=>{lab[r.q.value.split("/").pop()]=r.l.value})}
  const ok=[];g.forEach((e,q)=>{if(lab[q]&&keyOf(lab[q]).includes(keyOf(e)))ok.push(q);else console.warn("seed rejected:",q,"expected",e,"got",lab[q])});
@@ -198,12 +201,13 @@ function cachePut(id,o){const idx=store.get("poolidx",[]).filter(x=>x!=id);idx.p
 const isBad=id=>{const b=store.get("bad",{})[id];return b&&Date.now()-b.t<CFG.CACHE_DAYS*864e5};
 const markBad=(id,why)=>{const b=store.get("bad",{});b[id]={t:Date.now(),why};store.set("bad",b)};
 function toPool(t,o){const items=o.items.map(([w,sl,al])=>mkItem(w,al));return{b:t.b,sb:t.sb,q:t.q,id:t.id,pat:t.pat,loose:t.loose,ex:t.ex,capped:!!o.capped,raw:o.items,items,sl:o.items.map(x=>x[1]),tr:tiersFor(items.length)}}
-async function loadPool(t,daily){let o=cacheGet(t.id);if(!o){let rows;try{rows=await sparql(poolQuery(t.pat,t.limit||CFG.LIMIT,t.minSl),t.deep?14000:0)}catch(e){if(t.deep)markBad(t.id,"slow query");throw e}const cp=cleanPool(rows,t),why=gate(cp);if(why){markBad(t.id,why);console.info("rejected",t.q,"-",why);return null}
+async function loadPool(t,daily){if(PK){const m=PK.pools[t.id];if(!m)return null;let o=PKC.get(t.id);if(!o){const r=await fetch(CFG.PACK_BASE+"/pools/"+m.f);if(!r.ok)throw new Error("pack file missing ("+r.status+")");const j=await r.json();o={items:j.items.map(x=>[x[0],x[1],x[2]||[]]),capped:!!j.capped};PKC.set(t.id,o)}return toPool(t,o)}
+ let o=cacheGet(t.id);if(!o){let rows;try{rows=await sparql(poolQuery(t.pat,t.limit||CFG.LIMIT,t.minSl),t.deep?14000:0)}catch(e){if(t.deep)markBad(t.id,"slow query");throw e}const cp=cleanPool(rows,t),why=gate(cp);if(why){markBad(t.id,why);console.info("rejected",t.q,"-",why);return null}
   o={t:Date.now(),items:cp.items,capped:rows.length>=(t.limit||CFG.LIMIT)};cachePut(t.id,o)}return toPool(t,o)}
 const VOW="aeiou";
 function variantOpts(pool){const lab=pool.items.map(it=>strip(it.w)),cnt={},ec={},o=[];lab.forEach(l=>{if(!l)return;cnt[l[0]]=(cnt[l[0]]||0)+1;const e=l[l.length-1];ec[e]=(ec[e]||0)+1});
  Object.keys(cnt).filter(L=>/[a-z]/.test(L)&&cnt[L]>=CFG.MIN_POOL).forEach(L=>o.push({k:"s",l:L,w:5}));o.push({k:"v",w:2});
- Object.keys(ec).filter(L=>/[a-z]/.test(L)&&ec[L]>=CFG.MIN_POOL).forEach(L=>o.push({k:"e",l:L,w:1}));o.push({k:"w",w:1},{k:"w7",w:.6},{k:"l5",w:.5});return o}
+ Object.keys(ec).filter(L=>/[a-z]/.test(L)&&ec[L]>=CFG.MIN_POOL).forEach(L=>o.push({k:"e",l:L,w:1}));o.push({k:"w",w:.8},{k:"w7",w:.3},{k:"l5",w:.4});return o}
 const vfn={s:l=>x=>strip(x)[0]==l,v:()=>x=>VOW.includes(strip(x)[0]),e:l=>x=>{const z=strip(x);return z[z.length-1]==l},w:()=>x=>!strip(x).includes(" "),w7:()=>x=>{const z=strip(x);return z.length>=7&&!z.includes(" ")},l5:()=>x=>{const z=strip(x);return z.length==5}};
 const mkFilt=v=>vfn[v.k](v.l);
 const vtext=(v,n,place)=>{const a=art(n),L=(v.l||"").toUpperCase();return v.k=="s"?`Name ${a} ${n} ${place?"whose name":"that"} starts with ${L}`:v.k=="v"?`Name ${a} ${n} that starts with a vowel`:v.k=="e"?`Name ${a} ${n} that ends in ${L}`:v.k=="w"?`Name a one-word ${n}`:v.k=="w7"?`Name a one-word ${n} whose name is 7 or more letters`:`Name ${a} ${n} with a five-letter name`};
@@ -220,14 +224,15 @@ const famOK=(c,d)=>(c.sl[0]||0)>=d.top&&c.sl.filter(x=>x>=d.sl).length>=d.kn;
 const wshuf=(a,r)=>a.map(t=>[Math.pow(r(),1/(t.pri||1)),t]).sort((x,y)=>y[0]-x[0]).map(x=>x[1]);
 // ===== selection: deterministic order per seed, first N that pass the rules =====
 let lastErr=null;
+let VCAP=0;
 async function collect(queue,need,accept,daily,prog){const out=[];let i=0,tries=0,fails=0;
  while(out.length<need&&i<queue.length&&tries<CFG.ATTEMPTS){const batch=[];while(batch.length<Math.min(CFG.PARALLEL,need-out.length+1)&&i<queue.length){const t=queue[i++];if(daily||!isBad(t.id))batch.push(t)}
   const res=await Promise.all(batch.map(t=>(t.variant?loadVariant(t,daily):loadPool(t,daily)).catch(e=>{lastErr=e;fails++;return undefined})));tries+=res.filter(x=>x!==undefined).length;if(fails>=10||Date.now()>DL)break;
-  for(let k=0;k<batch.length&&out.length<need;k++){const p=res[k];if(p&&famOK(p,dif(daily))&&accept(batch[k],out)){out.push(p);prog&&prog(out.length,need)}}}
+  for(let k=0;k<batch.length&&out.length<need;k++){const p=res[k];if(p&&p.v&&VCAP>=2)continue;if(p&&famOK(p,dif(daily))&&accept(batch[k],out)){if(p.v)VCAP++;out.push(p);prog&&prog(out.length,need)}}}
  return out}
 async function prepare({seed,broad,sports,prog}){const dayI=seed&&/^krill\d+$/.test(seed)?+seed.slice(5):null,day=dayI!==null?new Date(DAY0+dayI*864e5).toISOString().slice(0,10):null;
  if(day&&!broad){const pk=await loadPack(day);if(pk)return pk}
- CURS=seed||null;DL=Date.now()+CFG.BUDGET;const ok=await checkSeeds(),daily=!!seed,r=seed?rng(seed):Math.random,use=TPLS.filter(t=>t.g.every(([q])=>ok.has(q)));let out;lastErr=null;
+ CURS=seed||null;VCAP=0;DL=Date.now()+CFG.BUDGET;const ok=await checkSeeds(),daily=!!seed,r=seed?rng(seed):Math.random,use=TPLS.filter(t=>t.g.every(([q])=>ok.has(q))&&(!PK||PK.pools[(t.base||t).id]));let out;lastErr=null;
  if(sports){out=(await collect(wshuf(use.filter(t=>t.sb),r),10,(t,o)=>o.filter(p=>p.sb==t.sb).length<2,daily,prog)).map(c=>mkPrompt(c,1))}
  else if(broad){out=(await collect(wshuf(use.filter(t=>t.b==broad),r),7,()=>true,daily,prog)).map(c=>mkPrompt(c,0))}
  else{const qs=shuf(BR,r).slice(0,7).map(b=>wshuf(use.filter(t=>t.b==b),r));let done=0;const rest=wshuf(use,r);
@@ -250,8 +255,10 @@ function judge(p,raw){const q=tokq(raw).map(stm),a=q.join("");if(!a)return null;
 function fuzzyJudge(p,raw){if(!store.get("fz",1))return null;const q=tokq(raw).map(stm),a=q.join("");if(a.length<5||GK.has(a))return null;const L=p.c.loose,C=[a];if(L)for(let k=1;k<q.length;k++)C.push(q.slice(-k).join(""));
  let best=9,hit=[];eligible(p).forEach(o=>{const K=o.it.n.concat(L?o.it.t.filter(A=>A.length>1).map(A=>A[A.length-1]):[]);K.forEach(x=>{if(x.length<6)return;C.forEach(c=>{if(c.length<5||c[0]!=x[0]||Math.abs(c.length-x.length)>1||x.replace(/\D/g,"")!=c.replace(/\D/g,""))return;const d=dl(x,c);if(d<1||d>(x.length>=12?2:1))return;if(d<best){best=d;hit=[o]}else if(d==best&&!hit.includes(o))hit.push(o)})})});
  return hit.length==1?{word:hit[0].it.w,idx:tix(p.c,hit[0].i),fix:true}:null}
-async function isRealThing(raw){const a=keyOf(raw);try{return((await getJSON(CFG.API+"?action=wbsearchentities&format=json&origin=*&language=en&uselang=en&type=item&limit=7&search="+encodeURIComponent(raw))).search||[]).some(x=>[x.label,x.match&&x.match.text].filter(Boolean).map(keyOf).includes(a))}catch(e){return false}}
-async function liveJudge(p,raw){const c=p.c,a=keyOf(raw);if(a.length<3||!c.pat)return null;let cands;
+async function isRealThing(raw){const a=keyOf(raw);if(RK.has(a))return RK.get(a);if(CFG.LIVE_CHECK===false)return false;try{const v=((await getJSON(CFG.API+"?action=wbsearchentities&format=json&origin=*&language=en&uselang=en&type=item&limit=7&search="+encodeURIComponent(raw))).search||[]).some(x=>[x.label,x.match&&x.match.text].filter(Boolean).map(keyOf).includes(a));RK.set(a,v);return v}catch(e){return false}}
+const LK=new Map(),RK=new Map();let lastLive=0;
+async function liveJudge(p,raw){if(CFG.LIVE_CHECK===false)return null;const ck=p.c.id+"|"+keyOf(raw);if(LK.has(ck))return LK.get(ck);const gap=CFG.LIVE_GAP-(Date.now()-lastLive);if(gap>0)await new Promise(r=>setTimeout(r,gap));lastLive=Date.now();const r=await liveJudge0(p,raw);LK.set(ck,r);return r}
+async function liveJudge0(p,raw){const c=p.c,a=keyOf(raw);if(a.length<3||!c.pat)return null;let cands;
  try{cands=(await getJSON(CFG.API+"?action=wbsearchentities&format=json&origin=*&language=en&uselang=en&type=item&limit=10&search="+encodeURIComponent(raw))).search||[]}catch(e){return null}
  const near=cands.filter(x=>[x.label,x.match&&x.match.text].filter(Boolean).map(keyOf).includes(a));if(!near.length)return null;
  let rows;try{rows=await sparql(`SELECT ?item ?sl WHERE { VALUES ?item { ${near.map(x=>"wd:"+x.id).join(" ")} } ${c.pat} ?item wikibase:sitelinks ?sl . }`)}catch(e){return null}
@@ -328,7 +335,7 @@ function setDepth(pts,D){const from=shown,to=pts*10;shown=to;const t=performance
 function hud(){const total=S.sports?10:7;$('sq').innerHTML=Array.from({length:total},(_,i)=>`<i class="${i<S.log.length?"on":""}"></i>`).join("");$('hl').textContent=S.log.length>=total?(S.sports?"ROUND COMPLETE":"DIVE COMPLETE"):S.label.toUpperCase()}
 function genUI(show,title,sub,err){$("gen").classList.toggle("hidden",!show);if(!show)return;$("gt").textContent=title||"";$("gs").textContent=sub||"";$("gx").classList.toggle("hidden",!err);$("gr").classList.toggle("hidden",!err||!RETRY);$("gs").style.color=err?"var(--pk)":""}
 let genId=0,RETRY=null;const whyFail=e=>e&&[429,502,503,504].includes(e.status)?"Wikidata is busy right now (HTTP "+e.status+"). Questions already built are saved, so Retry picks up where it stopped.":e&&e.message==="Wikidata is responding slowly"?"Wikidata is responding slowly. Questions already built are saved, so Retry picks up where it stopped.":(e&&e.message||String(e))+" Questions already built are saved; try Retry.";
-async function start(key,label,pool,seed,broad){const sports=broad==="sports",my=++genId;$("menu").classList.add("hidden");genUI(true,"CHARTING THE DIVE…","Generating questions from Wikidata (first run takes a moment)");
+async function start(key,label,pool,seed,broad){const sports=broad==="sports",my=++genId;$("menu").classList.add("hidden");genUI(true,"CHARTING THE DIVE…","Generating questions…");
   let ps;try{ps=await prepare({seed,broad,sports,prog:(n,m)=>{if(my==genId)genUI(true,"CHARTING THE DIVE…",n+" / "+m+" questions passed the "+CFG.MIN_POOL+"+ answer rule")}})}catch(e){if(my==genId)RETRY=()=>start(key,label,pool,seed,broad);genUI(true,"COULDN'T BUILD THIS DIVE",whyFail(e),true);return}
   if(my!=genId)return;genUI(false);
   S={key,label,pool,broad,seed,ps,i:0,pts:0,log:[],sports};shown=0;dep=0;document.body.classList.toggle("sports-mode",sports);document.title=sports?"EBK Required—Sports":"frillion";document.querySelector("#hud .pn:first-child small").textContent=sports?"ROUND":"DEPTH";document.querySelector("#hud .pn:last-child small").textContent=sports?"POINTS":"SCORE";$("you").textContent=sports?"HOME":"YOU";view("play");setDepth(0);ask()}

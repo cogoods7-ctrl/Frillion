@@ -1,9 +1,9 @@
 name: Build Frillion question packs
 
 on:
-  workflow_dispatch:
+  workflow_dispatch:          # run by hand from the Actions tab
   schedule:
-    - cron: "17 7 * * 1"
+    - cron: "17 7 * * 1"      # every Monday 07:17 UTC (2:17 AM Eastern)
 
 permissions:
   contents: write
@@ -18,13 +18,16 @@ jobs:
     timeout-minutes: 330
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: 22
+
       - name: Build packs from Wikidata
         env:
           WD_CONTACT: https://github.com/${{ github.repository }}
         run: node build-packs.mjs --html index.html --out packs --delay 2000 --max-minutes 300
+
       - name: Commit updated packs
         if: always()
         run: |
@@ -33,7 +36,12 @@ jobs:
           git add packs
           if git diff --cached --quiet; then
             echo "No pack changes."
-          else
-            git commit -m "Update question packs ($(date -u +%Y-%m-%d))"
-            git push
+            exit 0
           fi
+          git commit -m "Update question packs ($(date -u +%Y-%m-%d))"
+          # if you committed something while the build ran, put the packs on top of it instead of failing
+          for i in 1 2 3; do
+            git pull --rebase origin main && git push && exit 0
+            sleep 10
+          done
+          exit 1

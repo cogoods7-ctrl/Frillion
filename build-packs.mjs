@@ -69,7 +69,8 @@ const fresh = t => t && Date.now() - t < MAXAGE;
 // ---- 1. verify seed entities (guards against wrong Wikidata IDs) ----
 const guards = new Map();
 TPLS.forEach(t => t.g.forEach(([q, e]) => guards.set(q, e)));
-if (REFRESH || !idx.seedAt || !fresh(idx.seedAt) || !idx.seedok.length) {
+const unchecked = [...guards.keys()].filter(q => !(idx.seedAll || idx.seedok).includes(q));
+if (REFRESH || !idx.seedAt || !fresh(idx.seedAt) || !idx.seedok.length || unchecked.length) {
   console.log(`Checking ${guards.size} seed entities…`);
   const ids = [...guards.keys()], lab = {};
   for (let i = 0; i < ids.length; i += 60) {
@@ -80,14 +81,22 @@ if (REFRESH || !idx.seedAt || !fresh(idx.seedAt) || !idx.seedok.length) {
   const ok = [];
   guards.forEach((e, q) => { if (lab[q] && keyOf(lab[q]).includes(keyOf(e))) ok.push(q); else console.log(`  seed rejected: ${q} expected "${e}" got "${lab[q]}"`); });
   if (ok.length < guards.size / 3) throw new Error("Most seed labels did not match — refusing to build wrong packs");
-  idx.seedok = ok; idx.seedAt = Date.now(); save();
+  idx.seedok = ok; idx.seedAll = [...guards.keys()]; idx.seedAt = Date.now(); save();
 }
 const okSeed = new Set(idx.seedok);
 
 // ---- 2. build pools, most useful templates first ----
+const sig = t => t.pat + "|" + (t.limit || CFG.LIMIT) + "|" + (t.minSl || CFG.MIN_SL);
+const jit = id => { let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) >>> 0; return h % 14; };
+const freshFor = (id, ts) => ts && Date.now() - ts < MAXAGE - 9 * 864e5 + jit(id) * 864e5;
+// packs built before signatures existed: these templates' queries were changed, so rebuild them once
+const LEGACY_CHANGED = /^(n:|c:fv$|g:|c:Q515|k:Q515@|c:Q8502|k:Q8502@|c:(Q134768|Q10943|Q746549|Q3314483|Q11004|Q40050|Q42527)$|o:Q746549@|o:Q10943@)/;
+const sameQuery = (e, t) => e && (e.s ? e.s === sig(t) : !LEGACY_CHANGED.test(t.id));
+const statsOf = sls => [sls[0] || 0, sls.filter(x => x >= 40).length, sls.filter(x => x >= 25).length, sls.filter(x => x >= 12).length];
 const fileOf = id => id.replace(/[^A-Za-z0-9]+/g, "_") + ".json";
 const seen = new Map();
-let todo = TPLS.filter(t => !t.variant && t.g.every(([q]) => okSeed.has(q))).sort((a, b) => (b.pri - a.pri) || a.id.localeCompare(b.id));
+const isNew = t => !(idx.pools[t.id] && sameQuery(idx.pools[t.id], t));
+let todo = TPLS.filter(t => !t.variant && t.g.every(([q]) => okSeed.has(q))).sort((a, b) => (isNew(b) - isNew(a)) || (b.pri - a.pri) || a.id.localeCompare(b.id));
 todo.forEach(t => { const f = fileOf(t.id); if (seen.has(f)) throw new Error("file name collision: " + t.id + " / " + seen.get(f)); seen.set(f, t.id); });
 if (ONLY) todo = todo.filter(t => t.id.startsWith(ONLY));
 if (LIMIT) todo = todo.slice(0, LIMIT);
@@ -95,18 +104,19 @@ let done = 0, built = 0, skipped = 0, rejected = 0, errors = 0, consecutive = 0;
 for (const t of todo) {
   done++;
   const have = idx.pools[t.id], bad = idx.bad[t.id];
-  if (!REFRESH && ((have && fresh(have.t)) || (bad && fresh(bad[1])))) { skipped++; continue; }
+  if (!REFRESH && ((have && freshFor(t.id, have.t) && sameQuery(have, t)) || (bad && freshFor(t.id, bad[1]) && sameQuery({ s: bad[2] }, t) && bad[2]))) { skipped++; continue; }
+  if (!REFRESH && bad && !bad[2] && freshFor(t.id, bad[1]) && !LEGACY_CHANGED.test(t.id)) { skipped++; continue; }
   if (outOfTime()) { console.log("Time budget reached — stopping; re-run to resume."); break; }
   process.stdout.write(`[${done}/${todo.length}] ${t.q} … `);
   try {
     const limit = t.limit || CFG.LIMIT, rows = await sparql(poolQuery(t.pat, limit, t.minSl));
     const cp = cleanPool(rows, t), why = gate(cp);
     consecutive = 0;
-    if (why) { idx.bad[t.id] = [why, Date.now()]; delete idx.pools[t.id]; rejected++; console.log("rejected (" + why + ")"); }
+    if (why) { idx.bad[t.id] = [why, Date.now(), sig(t)]; delete idx.pools[t.id]; rejected++; console.log("rejected (" + why + ")"); }
     else {
       const items = cp.items.map(([w, sl, al]) => al && al.length ? [w, sl, al] : [w, sl]);
       fs.writeFileSync(path.join(OUT, "pools", fileOf(t.id)), JSON.stringify({ id: t.id, q: t.q, capped: rows.length >= limit, items }));
-      idx.pools[t.id] = { f: fileOf(t.id), n: items.length, c: rows.length >= limit ? 1 : 0, t: Date.now() }; delete idx.bad[t.id];
+      idx.pools[t.id] = { f: fileOf(t.id), n: items.length, c: rows.length >= limit ? 1 : 0, t: Date.now(), s: sig(t), m: statsOf(items.map(x => x[1])) }; delete idx.bad[t.id];
       built++; console.log(`ok (${items.length} answers)`);
     }
   } catch (e) {
@@ -116,5 +126,9 @@ for (const t of todo) {
   if (done % 10 === 0) save();
   await sleep(DELAY);
 }
+for (const [id, e] of Object.entries(idx.pools)) if (!e.m) { try { e.m = statsOf(JSON.parse(fs.readFileSync(path.join(OUT, "pools", e.f), "utf8")).items.map(x => x[1])); } catch (err) {} }
+const live = new Set(TPLS.map(t => t.id));
+for (const id of Object.keys(idx.pools)) if (!live.has(id)) { try { fs.unlinkSync(path.join(OUT, "pools", idx.pools[id].f)); } catch (e) {} delete idx.pools[id]; }
+for (const id of Object.keys(idx.bad)) if (!live.has(id)) delete idx.bad[id];
 save();
 console.log(`\nDone. built ${built}, kept ${skipped}, rejected by rules ${rejected}, errors ${errors}. Packs in index: ${Object.keys(idx.pools).length}.`);

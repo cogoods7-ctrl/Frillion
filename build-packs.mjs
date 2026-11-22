@@ -96,7 +96,7 @@ const statsOf = sls => [sls[0] || 0, sls.filter(x => x >= 40).length, sls.filter
 const fileOf = id => id.replace(/[^A-Za-z0-9]+/g, "_") + ".json";
 const seen = new Map();
 const isNew = t => !(idx.pools[t.id] && sameQuery(idx.pools[t.id], t));
-let todo = TPLS.filter(t => !t.variant && t.g.every(([q]) => okSeed.has(q))).sort((a, b) => (isNew(b) - isNew(a)) || (b.pri - a.pri) || a.id.localeCompare(b.id));
+let todo = TPLS.filter(t => !t.variant && t.pat && t.g.every(([q]) => okSeed.has(q))).sort((a, b) => (isNew(b) - isNew(a)) || (b.pri - a.pri) || a.id.localeCompare(b.id));
 todo.forEach(t => { const f = fileOf(t.id); if (seen.has(f)) throw new Error("file name collision: " + t.id + " / " + seen.get(f)); seen.set(f, t.id); });
 if (ONLY) todo = todo.filter(t => t.id.startsWith(ONLY));
 if (LIMIT) todo = todo.slice(0, LIMIT);
@@ -110,7 +110,7 @@ for (const t of todo) {
   process.stdout.write(`[${done}/${todo.length}] ${t.q} … `);
   try {
     const limit = t.limit || CFG.LIMIT, rows = await sparql(poolQuery(t.pat, limit, t.minSl));
-    const cp = cleanPool(rows, t), why = gate(cp);
+    const cp = cleanPool(rows, t), why = t.cur ? (cp.items.length ? "" : "empty fallback") : gate(cp);
     consecutive = 0;
     if (why) { idx.bad[t.id] = [why, Date.now(), sig(t)]; delete idx.pools[t.id]; rejected++; console.log("rejected (" + why + ")"); }
     else {
